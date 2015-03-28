@@ -1,4 +1,14 @@
+#include <XBee.h>
 #include <EmonLib.h>
+#define MAX_PAYLOAD_SIZE 52
+
+// create the XBee object
+XBee xbee = XBee();
+uint8_t payload[MAX_PAYLOAD_SIZE];
+
+// SH + SL Address of receiving XBee
+XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x00000000);
+ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
 
 EnergyMonitor ct1, ct2, ct3, ct4;
 
