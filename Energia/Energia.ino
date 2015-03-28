@@ -12,6 +12,8 @@ ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
 
 EnergyMonitor ct1, ct2, ct3, ct4;
 
+char val[20];
+
 void setup() {
   
   Serial.begin(9600);
@@ -31,7 +33,8 @@ void setup() {
 }
 
 void loop() {
-  
+
+  // Calculate all. No.of crossings, time-out
   ct1.calcVI(20,2000);
   ct2.calcVI(20,2000);
   ct3.calcVI(20,2000);
@@ -49,6 +52,20 @@ void loop() {
   float P2  = ct2.realPower;
   float P3  = ct3.realPower;
   float P4  = ct4.realPower;
+  
+    
+  String StringV1 = dtostrf(V1,3,1,val);
+  String StringV2 = dtostrf(V2,3,1,val);
+  String StringV3 = dtostrf(V3,3,1,val);
+  String StringV4 = dtostrf(V4,3,1,val);
+  String StringI1 = dtostrf(I1,2,1,val);
+  String StringI2 = dtostrf(I2,2,1,val);
+  String StringI3 = dtostrf(I3,2,1,val);
+  String StringI4 = dtostrf(I4,2,1,val);
+  String StringP1 = dtostrf(P1,3,1,val);
+  String StringP2 = dtostrf(P2,3,1,val);
+  String StringP3 = dtostrf(P3,3,1,val);
+  String StringP4 = dtostrf(P4,3,1,val);
   
   delay(5000);
 }
