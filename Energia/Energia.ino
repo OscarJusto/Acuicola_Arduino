@@ -12,6 +12,7 @@ ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
 
 EnergyMonitor ct1, ct2, ct3, ct4;
 
+String pzb;
 char val[20];
 
 void setup() {
@@ -66,6 +67,34 @@ void loop() {
   String StringP2 = dtostrf(P2,3,1,val);
   String StringP3 = dtostrf(P3,3,1,val);
   String StringP4 = dtostrf(P4,3,1,val);
+  
+  pzb  = StringV1;
+  pzb += " ";
+  pzb += StringV2;
+  pzb += " ";
+  pzb += StringV3;
+  pzb += " ";
+  pzb += StringV4;
+  pzb += " ";
+  pzb += StringI1;
+  pzb += " ";
+  pzb += StringI2;
+  pzb += " ";
+  pzb += StringI3;
+  pzb += " ";
+  pzb += StringI4;
+  pzb += " ";
+  pzb += StringP1;
+  pzb += " ";
+  pzb += StringP2;
+  pzb += " ";
+  pzb += StringP3;
+  pzb += " ";
+  pzb += StringP4;
+  
+  for (int i=0; i<=pzb.length(); i++) {
+    payload[i] = pzb[i];
+  }
   
   delay(5000);
 }
