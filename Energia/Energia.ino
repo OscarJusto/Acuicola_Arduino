@@ -92,9 +92,20 @@ void loop() {
   pzb += " ";
   pzb += StringP4;
   
+  borrarPayload();
+  
   for (int i=0; i<=pzb.length(); i++) {
     payload[i] = pzb[i];
   }
   
+  xbee.send(zbTx);
+  
   delay(5000);
+}
+
+void borrarPayload() {
+  
+  for ( int n=0; n<=MAX_PAYLOAD_SIZE; n++) {
+   payload[n]= ' ';
+ }
 }
