@@ -1,6 +1,6 @@
 #include <XBee.h>
 #include <EmonLib.h>
-#define MAX_PAYLOAD_SIZE 52
+#define MAX_PAYLOAD_SIZE 72
 
 // create the XBee object
 XBee xbee = XBee();
@@ -31,6 +31,7 @@ void setup() {
   ct3.voltage(0, 122.54, 1.7);
   ct4.voltage(0, 122.54, 1.7);
   
+  delay (10000);
 }
 
 void loop() {
@@ -53,8 +54,7 @@ void loop() {
   float P2  = ct2.realPower;
   float P3  = ct3.realPower;
   float P4  = ct4.realPower;
-  
-    
+     
   String StringV1 = dtostrf(V1,3,1,val);
   String StringV2 = dtostrf(V2,3,1,val);
   String StringV3 = dtostrf(V3,3,1,val);
