@@ -9,6 +9,12 @@ XBee xbee = XBee();
 
 EnergyMonitor ct1, ct2, ct3, ct4;
 
+int XB0 = 10;  int XB1 = 11;  int XB2 = 12;  int XB3 = 13;    //Entradas de comandos remotos xbee para activar motores
+int MT0 = 9;   int MT1 = 8;   int MT2 = 7;   int MT3 = 6;     //Salidas de control de motores
+
+int RD0 = 0;   int RD1 = 0;   int RD2 = 0;   int RD3 = 0;     //Indicador actual de estados de comandos remotos xbee
+int LD0 = 0;   int LD1 = 0;   int LD2 = 0;   int LD3 = 0;     //Indicador anterior de estados de comandos remotos xbee
+
 void sendInfoPayload(String info) {
   char payload[1+info.length()];
   PString infoString(payload, sizeof(payload));
@@ -21,6 +27,42 @@ void sendInfoPayload(String info) {
   xbee.send(zbTx);
 }
 
+ISR(TIMER1_COMPA_vect) {
+
+  RD0 = digitalRead(XB0);  RD1 = digitalRead(XB1);
+  RD2 = digitalRead(XB2);  RD3 = digitalRead(XB3);
+
+  if ((RD0 != LD0) || (RD1 != LD1) || (RD2 != LD2) || (RD3 != LD3)) {
+
+    if (RD0 == HIGH) {
+      digitalWrite(MT0, HIGH);
+    } else {
+      digitalWrite(MT0, LOW);
+    }
+  
+    if (RD1 == HIGH) {
+      digitalWrite(MT1, HIGH);
+    } else {
+      digitalWrite(MT1, LOW);
+    }
+  
+    if (RD2 == HIGH) {
+      digitalWrite(MT2, HIGH);
+    } else {
+      digitalWrite(MT2, LOW);
+    }
+  
+    if (RD3 == HIGH) {
+      digitalWrite(MT3, HIGH);
+    } else {
+      digitalWrite(MT3, LOW);
+    }
+  }
+  
+  LD0 = RD0;  LD1 = RD1;  LD2 = RD2;  LD3 = RD3;
+  
+}
+
 String pzb;
 char val[20];
 
@@ -28,6 +70,9 @@ void setup() {
   
   Serial.begin(9600);
   
+  pinMode(XB0, INPUT);  pinMode(XB1, INPUT);  pinMode(XB2, INPUT);  pinMode(XB3, INPUT);
+  pinMode(MT0, OUTPUT); pinMode(MT1, OUTPUT); pinMode(MT2, OUTPUT); pinMode(MT3, OUTPUT);
+
   // Calibration = CT ratio / burden resistance = (100A / 0.05A) / 33 Ohms = 60.606
   ct1.current(1, 60.606);
   ct2.current(2, 60.606);
@@ -96,6 +141,10 @@ void loop() {
   String StringP2 = dtostrf(P2,3,1,val);
   String StringP3 = dtostrf(P3,3,1,val);
   String StringP4 = dtostrf(P4,3,1,val);
+  String StringLD0 = String(LD0);
+  String StringLD1 = String(LD1);
+  String StringLD2 = String(LD2);
+  String StringLD3 = String(LD3);
   
   pzb = "";
 
@@ -122,6 +171,11 @@ void loop() {
   pzb += StringP3;
   pzb += " ";
   pzb += StringP4;
+  pzb += " ";
+  pzb += StringLD0;
+  pzb += StringLD1;
+  pzb += StringLD2;
+  pzb += StringLD3;
   
   sendInfoPayload(pzb);
   
