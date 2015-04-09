@@ -1,16 +1,24 @@
+#include <PString.h>
 #include <XBee.h>
 #include <EmonLib.h>
-#define MAX_PAYLOAD_SIZE 72
 
 // create the XBee object
 XBee xbee = XBee();
-uint8_t payload[MAX_PAYLOAD_SIZE];
-
-// SH + SL Address of receiving XBee
-XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x00000000);
-ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload));
 
 EnergyMonitor ct1, ct2, ct3, ct4;
+
+void sendInfoPayload(String info) {
+  char payload[1+info.length()];
+  PString infoString(payload, sizeof(payload));
+  infoString.print(info);
+
+  // SH + SL Address of receiving XBee
+  XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x00000000);
+  ZBTxRequest zbTx = ZBTxRequest(addr64, (uint8_t *)payload, sizeof(payload));
+
+  xbee.send(zbTx);
+
+}
 
 String pzb;
 char val[20];
@@ -68,6 +76,8 @@ void loop() {
   String StringP3 = dtostrf(P3,3,1,val);
   String StringP4 = dtostrf(P4,3,1,val);
   
+  pzb = "";
+
   pzb  = StringV1;
   pzb += " ";
   pzb += StringV2;
@@ -92,20 +102,7 @@ void loop() {
   pzb += " ";
   pzb += StringP4;
   
-  borrarPayload();
-  
-  for (int i=0; i<=pzb.length(); i++) {
-    payload[i] = pzb[i];
-  }
-  
-  xbee.send(zbTx);
+  sendInfoPayload(pzb);
   
   delay(5000);
-}
-
-void borrarPayload() {
-  
-  for ( int n=0; n<=MAX_PAYLOAD_SIZE; n++) {
-   payload[n]= ' ';
- }
 }
