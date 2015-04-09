@@ -1,3 +1,5 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
 #include <PString.h>
 #include <XBee.h>
 #include <EmonLib.h>
@@ -17,7 +19,6 @@ void sendInfoPayload(String info) {
   ZBTxRequest zbTx = ZBTxRequest(addr64, (uint8_t *)payload, sizeof(payload));
 
   xbee.send(zbTx);
-
 }
 
 String pzb;
@@ -39,6 +40,26 @@ void setup() {
   ct3.voltage(0, 122.54, 1.7);
   ct4.voltage(0, 122.54, 1.7);
   
+   //inicializar Timer1
+  cli();                 //interrupciones de parada global
+  TCCR1A = 0;            //establce todo el registro TCCR1 a 0
+  TCCR1B = 0;            //hace lo mismo
+  //Establecer el registro de comparacion para la cuenta del timer deseada
+  OCR1A =15624; // -> 1 Seg
+  //OCR1A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
+  //OCR1A =3905.25; // = (16MHz)/(1024*4) -1 = 31249 (debe ser < 65536) -> 0.25 Seg
+  //Turna en modo CTC:
+  TCCR1B |= (1 << WGM12);
+  //Ajusta los bits de CS10 y CS12 a 1024 prescale
+  TCCR1B |= (1 << CS10);
+  TCCR1B |= (1 << CS12);
+  //Permite al timer compara la interrupcion
+  TIMSK1 |= (1 << OCIE1A);
+  //Permite al timer1 interrupcion por desbordamiento
+  //TIMSK1 = (1 << TOIE1);
+  //habilita las interrupciones globales
+  sei();
+
   delay (10000);
 }
 
