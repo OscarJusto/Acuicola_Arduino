@@ -4,8 +4,7 @@
 #include <XBee.h>
 #include <EmonLib.h>
 
-// create the XBee object
-XBee xbee = XBee();
+XBee xbee = XBee();                                           // create the XBee object
 
 EnergyMonitor ct0, ct1, ct2, ct3;
 
@@ -22,7 +21,7 @@ int LD0 = 0;   int LD1 = 0;   int LD2 = 0;   int LD3 = 0;     //Indicadores de p
 
 int BT0 = 0;   int BT1 = 0;   int BT2 = 0;   int BT3 = 0;     //Indicador de estados de motores
 
-int SMF = 0;                                                 //Indicador de semaforo
+int SMF = 0;                                                  //Indicador de semaforo
 
 String pzb;
 char val[20];
@@ -46,6 +45,11 @@ volatile int time_out_3 = 40;
 volatile int count_on_3 = 0;
 volatile int count_off_3 = 0;
 
+volatile int count_jump_0 = 0;
+volatile int count_jump_1 = 0;
+volatile int count_jump_2 = 0;
+volatile int count_jump_3 = 0;
+
 volatile int seconds = 0;
 volatile int samples = 0;
 
@@ -53,8 +57,8 @@ void sendInfoPayload(String info) {
   char payload[1+info.length()];
   PString infoString(payload, sizeof(payload));
   infoString.print(info);
-
-  // SH + SL Address of receiving XBee
+  
+   // SH + SL Address of receiving XBee
   XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x00000000);
   ZBTxRequest zbTx = ZBTxRequest(addr64, (uint8_t *)payload, sizeof(payload));
 
@@ -84,7 +88,7 @@ ISR(TIMER1_COMPA_vect) {
       SMF = 0;
       digitalWrite(SF0, LOW);
     }
-    
+
     if ( (V0 < volt_low) || (V0 > volt_high) ) {
       count_off_0 ++;
       count_on_0 = 0;
@@ -96,24 +100,42 @@ ISR(TIMER1_COMPA_vect) {
     if ( (V1 < volt_low) || (V1 > volt_high) ) {
       count_off_1 ++;
       count_on_1 = 0;
+      if (count_off_1 >= 40 || BT1 == LOW) {
+        count_jump_1 = 0;
+      } else {
+        count_jump_1 = 10;
+      }
     } else {
       count_on_1 ++;
+      count_jump_1 ++;
       count_off_1 = 0;
     }
     
     if ( (V2 < volt_low) || (V2 > volt_high) ) {
       count_off_2 ++;
       count_on_2 = 0;
+      if (count_off_2 >= 40 || BT2 == LOW) {
+        count_jump_2 = 0;
+      } else {
+        count_jump_2 = 20;
+      }
     } else {
       count_on_2 ++;
+      count_jump_2 ++;
       count_off_2 = 0;
     }
     
     if ( (V3 < volt_low) || (V3 > volt_high) ) {
       count_off_3 ++;
       count_on_3 = 0;
+      if (count_off_3 >= 40 || BT3 == LOW) {
+        count_jump_3 = 0;
+      } else {
+        count_jump_3 = 30;
+      }
     } else {
       count_on_3 ++;
+      count_jump_3 ++;
       count_off_3 = 0;
     }
     
@@ -140,12 +162,16 @@ ISR(TIMER1_COMPA_vect) {
       BT1 = 0;
       count_off_1 = time_out_1;
     } else if (count_on_1 >= time_out_1) {
-      if (RD1 == HIGH) {
-      digitalWrite(MT1, HIGH);
-      BT1 = 1;
+      if (RD1 == HIGH && count_jump_1 >= 50 ) {
+        digitalWrite(MT1, HIGH);
+        BT1 = 1;
+        count_jump_1 = 50;
       } else {
         digitalWrite(MT1, LOW);
         BT1 = 0;
+        if (count_jump_1 >= 50) {
+          count_jump_1 = 50;
+        }
       }
       count_on_1 = time_out_1;
     } else if (RD1 == LOW) {
@@ -158,12 +184,16 @@ ISR(TIMER1_COMPA_vect) {
       BT2 = 0;
       count_off_2 = time_out_2;
     } else if (count_on_2 >= time_out_2) {
-      if (RD2 == HIGH) {
-      digitalWrite(MT2, HIGH);
-      BT2 = 1;
+      if (RD2 == HIGH && count_jump_2 >= 60) {
+        digitalWrite(MT2, HIGH);
+        BT2 = 1;
+        count_jump_2 = 60;
       } else {
         digitalWrite(MT2, LOW);
         BT2 = 0;
+        if (count_jump_2 >= 60) {
+          count_jump_1 = 60;
+        }
       }
       count_on_2 = time_out_2;
     } else if (RD2 == LOW) {
@@ -176,12 +206,16 @@ ISR(TIMER1_COMPA_vect) {
       BT3 = 0;
       count_off_3 = time_out_3;
     } else if (count_on_3 >= time_out_3) {
-      if (RD3 == HIGH) {
-      digitalWrite(MT3, HIGH);
-      BT3 = 1;
+      if (RD3 == HIGH && count_jump_3 >= 70) {
+        digitalWrite(MT3, HIGH);
+        BT3 = 1;
+        count_jump_3 = 70;
       } else {
         digitalWrite(MT3, LOW);
         BT3 = 0;
+        if (count_jump_3 >= 70) {
+          count_jump_1 = 70;
+        }
       }
       count_on_3 = time_out_3;
     } else if (RD3 == LOW) {
@@ -204,6 +238,10 @@ ISR(TIMER1_COMPA_vect) {
     Serial.print("on_1: ");  Serial.print(count_on_1);  Serial.print(" ");
     Serial.print("on_2: ");  Serial.print(count_on_2);  Serial.print(" ");
     Serial.print("on_3: ");  Serial.print(count_on_3);  Serial.print(" ");
+
+    Serial.print("jump_1: ");  Serial.print(count_jump_1); Serial.print(" ");
+    Serial.print("jump_2: ");  Serial.print(count_jump_2); Serial.print(" ");
+    Serial.print("jump_3: ");  Serial.print(count_jump_3); Serial.print(" ");
     
     Serial.print("Cmdos: "); Serial.print(LD0); Serial.print(LD1); Serial.print(LD2); Serial.print(LD3); Serial.print(" ");
     Serial.print("Edos: "); Serial.print(BT0); Serial.print(BT1); Serial.print(BT2); Serial.println(BT3);
@@ -343,5 +381,5 @@ void loop() {
   
   //sendInfoPayload(pzb);
   
-  delay(1000);
+  delay(4000);
 }
