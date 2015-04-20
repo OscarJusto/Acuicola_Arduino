@@ -6,7 +6,7 @@
 
 XBee xbee = XBee();                                           // create the XBee object
 
-EnergyMonitor ct0, ct1, ct2, ct3;
+EnergyMonitor ct0, ct1, ct2, ct3;                             // create the EnergyMonitor object
 
 float V0, V1, V2, V3;
 float I0, I1, I2, I3;
@@ -26,33 +26,37 @@ int SMF = 0;                                                  //Indicador de sem
 String pzb;
 char val[20];
 
-volatile int volt_low = 100;
+volatile int volt_low = 110;     //Minimo y maximo voltaje para desactivar motores
 volatile int volt_high = 140;
 
-volatile int time_out_0 = 40;
-volatile int count_on_0 = 0;
-volatile int count_off_0 = 0;
+volatile int seconds = 10;       //Tiempo para inciar el programa del timer1
+volatile int samples = 5;        //Tiempo para enviar muestras de lecturas
 
-volatile int time_out_1 = 40;
+volatile int time_step = 5;      //Tiempo de espera para activado escalonado de motores
+
+volatile int time_out_0 = 15;    //Tiempo de espera para desactivar y activar motores
+volatile int time_out_1 = 15;
+volatile int time_out_2 = 15;
+volatile int time_out_3 = 15;
+
+volatile int count_on_0 = 0;     //Contadores para activar motores
 volatile int count_on_1 = 0;
-volatile int count_off_1 = 0;
-
-volatile int time_out_2 = 40;
 volatile int count_on_2 = 0;
-volatile int count_off_2 = 0;
-
-volatile int time_out_3 = 40;
 volatile int count_on_3 = 0;
+
+volatile int count_off_0 = 0;    //Contadores para desactivar motores
+volatile int count_off_1 = 0;
+volatile int count_off_2 = 0;
 volatile int count_off_3 = 0;
 
-volatile int count_jump_0 = 0;
+volatile int count_jump_0 = 0;   //Contadores para activar motores en modo escalonado
 volatile int count_jump_1 = 0;
 volatile int count_jump_2 = 0;
 volatile int count_jump_3 = 0;
 
-volatile int seconds = 0;
-volatile int samples = 0;
+volatile int count_samples = 0; //Contador para muestreo de lecturas
 
+//Funcion para ajustar payload xbee y enviar los datos
 void sendInfoPayload(String info) {
   char payload[1+info.length()];
   PString infoString(payload, sizeof(payload));
@@ -65,18 +69,20 @@ void sendInfoPayload(String info) {
   xbee.send(zbTx);
 }
 
+
+//Funcion principal de timer1
 ISR(TIMER1_COMPA_vect) {
 
-  seconds ++;
+  seconds --;
 
-//  if (seconds <= 10) {
+//  if (seconds >= 0) {
 //    Serial.print("Seconds "); Serial.println(seconds);
 //    }
 
-  if (seconds >= 10) {
+  if (seconds <= 0) {
 
-    seconds = 10;
-    samples ++;
+    seconds = 0;
+    count_samples ++;
     
     RD0 = digitalRead(XB0);  RD1 = digitalRead(XB1);
     RD2 = digitalRead(XB2);  RD3 = digitalRead(XB3);
@@ -100,10 +106,10 @@ ISR(TIMER1_COMPA_vect) {
     if ( (V1 < volt_low) || (V1 > volt_high) ) {
       count_off_1 ++;
       count_on_1 = 0;
-      if (count_off_1 >= 40 || BT1 == LOW) {
+      if (count_off_1 >= time_out_1 || BT1 == LOW) {
         count_jump_1 = 0;
       } else {
-        count_jump_1 = 10;
+        count_jump_1 = time_step;
       }
     } else {
       count_on_1 ++;
@@ -114,10 +120,10 @@ ISR(TIMER1_COMPA_vect) {
     if ( (V2 < volt_low) || (V2 > volt_high) ) {
       count_off_2 ++;
       count_on_2 = 0;
-      if (count_off_2 >= 40 || BT2 == LOW) {
+      if (count_off_2 >= time_out_2 || BT2 == LOW) {
         count_jump_2 = 0;
       } else {
-        count_jump_2 = 20;
+        count_jump_2 = time_step * 2;
       }
     } else {
       count_on_2 ++;
@@ -128,10 +134,10 @@ ISR(TIMER1_COMPA_vect) {
     if ( (V3 < volt_low) || (V3 > volt_high) ) {
       count_off_3 ++;
       count_on_3 = 0;
-      if (count_off_3 >= 40 || BT3 == LOW) {
+      if (count_off_3 >= time_out_3 || BT3 == LOW) {
         count_jump_3 = 0;
       } else {
-        count_jump_3 = 30;
+        count_jump_3 = time_step * 3;
       }
     } else {
       count_on_3 ++;
@@ -162,15 +168,15 @@ ISR(TIMER1_COMPA_vect) {
       BT1 = 0;
       count_off_1 = time_out_1;
     } else if (count_on_1 >= time_out_1) {
-      if (RD1 == HIGH && count_jump_1 >= 50 ) {
+      if (RD1 == HIGH && count_jump_1 >= (time_out_1 + time_step) ) {
         digitalWrite(MT1, HIGH);
         BT1 = 1;
-        count_jump_1 = 50;
+        count_jump_1 = (time_out_1 + time_step);
       } else {
         digitalWrite(MT1, LOW);
         BT1 = 0;
-        if (count_jump_1 >= 50) {
-          count_jump_1 = 50;
+        if (count_jump_1 >= (time_out_1 + time_step) ) {
+          count_jump_1 = (time_out_1 + time_step);
         }
       }
       count_on_1 = time_out_1;
@@ -184,15 +190,15 @@ ISR(TIMER1_COMPA_vect) {
       BT2 = 0;
       count_off_2 = time_out_2;
     } else if (count_on_2 >= time_out_2) {
-      if (RD2 == HIGH && count_jump_2 >= 60) {
+      if (RD2 == HIGH && count_jump_2 >= (time_out_2 + (time_step * 2)) ) {
         digitalWrite(MT2, HIGH);
         BT2 = 1;
-        count_jump_2 = 60;
+        count_jump_2 = (time_out_2 + (time_step * 2));
       } else {
         digitalWrite(MT2, LOW);
         BT2 = 0;
-        if (count_jump_2 >= 60) {
-          count_jump_1 = 60;
+        if (count_jump_2 >= (time_out_2 + (time_step * 2)) ) {
+          count_jump_1 = (time_out_2 + (time_step * 2));
         }
       }
       count_on_2 = time_out_2;
@@ -206,15 +212,15 @@ ISR(TIMER1_COMPA_vect) {
       BT3 = 0;
       count_off_3 = time_out_3;
     } else if (count_on_3 >= time_out_3) {
-      if (RD3 == HIGH && count_jump_3 >= 70) {
+      if (RD3 == HIGH && count_jump_3 >= (time_out_3 + (time_step * 3))) {
         digitalWrite(MT3, HIGH);
         BT3 = 1;
-        count_jump_3 = 70;
+        count_jump_3 = (time_out_3 + (time_step * 3));
       } else {
         digitalWrite(MT3, LOW);
         BT3 = 0;
-        if (count_jump_3 >= 70) {
-          count_jump_1 = 70;
+        if (count_jump_3 >= (time_out_3 + (time_step * 3)) ) {
+          count_jump_1 = (time_out_3 + (time_step * 3)) ;
         }
       }
       count_on_3 = time_out_3;
@@ -248,8 +254,8 @@ ISR(TIMER1_COMPA_vect) {
 */
   }
   
-  if (samples >= 5) {
-    samples = 0;
+  if (count_samples >= samples) {
+    count_samples = 0;
     sendInfoPayload(pzb);
   }
   
@@ -381,5 +387,5 @@ void loop() {
   
   //sendInfoPayload(pzb);
   
-  delay(4000);
+  delay(2500);
 }
