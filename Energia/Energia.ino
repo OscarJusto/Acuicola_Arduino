@@ -276,10 +276,10 @@ void setup() {
   ct3.current(4, 60.606);
   
   // (ADC input, calibration, phase_shift)
-  ct0.voltage(0, 122.54, 1.7);
-  ct1.voltage(0, 122.54, 1.7);
-  ct2.voltage(0, 122.54, 1.7);
-  ct3.voltage(0, 122.54, 1.7);
+  ct0.voltage(0, 118.54, 1.7);
+  ct1.voltage(0, 118.54, 1.7);
+  ct2.voltage(0, 118.54, 1.7);
+  ct3.voltage(0, 118.54, 1.7);
   
    //inicializar Timer1
   cli();                 //interrupciones de parada global
