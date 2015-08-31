@@ -26,7 +26,7 @@ int SMF = 0;                                                  //Indicador de sem
 String pzb;
 char val[20];
 
-volatile int volt_low = 110;     //Minimo y maximo voltaje para desactivar motores
+volatile int volt_low = 100;     //Minimo y maximo voltaje para desactivar motores
 volatile int volt_high = 140;
 
 volatile int seconds = 10;       //Tiempo para inciar el programa del timer1
@@ -270,16 +270,18 @@ void setup() {
   pinMode(SF0, OUTPUT);
 
   // Calibration = CT ratio / burden resistance = (100A / 0.05A) / 33 Ohms = 60.606
-  ct0.current(1, 60.606);
-  ct1.current(2, 60.606);
-  ct2.current(3, 60.606);
-  ct3.current(4, 60.606);
+  ct0.current(0, 60.606);
+  ct1.current(1, 60.606);
+  ct2.current(2, 60.606);
+  ct3.current(3, 60.606);
   
   // (ADC input, calibration, phase_shift)
-  ct0.voltage(0, 118.54, 1.7);
-  ct1.voltage(0, 118.54, 1.7);
-  ct2.voltage(0, 118.54, 1.7);
-  ct3.voltage(0, 118.54, 1.7);
+  ct0.voltage(4, 118.54, 1.7);
+  ct1.voltage(4, 118.54, 1.7);
+  ct2.voltage(4, 118.54, 1.7);
+  ct3.voltage(4, 118.54, 1.7);
+  
+  attachInterrupt(0, stopMotors, RISING);
   
    //inicializar Timer1
   cli();                 //interrupciones de parada global
@@ -388,4 +390,14 @@ void loop() {
   //sendInfoPayload(pzb);
   
   delay(2500);
+}
+
+void stopMotors () {
+  while (1) {
+    digitalWrite(MT0, LOW);
+    digitalWrite(MT1, LOW);
+    digitalWrite(MT2, LOW);
+    digitalWrite(MT3, LOW);
+    digitalWrite(SF0, LOW);
+  }
 }
