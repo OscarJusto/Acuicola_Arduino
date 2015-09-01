@@ -94,10 +94,76 @@ void setup() {
   Serial.begin(9600); 
        
   configurar_menu();
-    
+  
+  displayMenu();  
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  
+  serialHandler();
+
+}
+
+void displayMenu() {
+  
+  Serial.println("");
+  // Display the menu
+  Menu const* cp_menu = menu_principal.get_current_menu();
+  
+  Serial.print("Nombre del Menu: ");
+  Serial.println(cp_menu->get_name());
+  
+  MenuComponent const* cp_menu_sel = cp_menu->get_selected();
+  for (int i = 0; i < cp_menu->get_num_menu_components(); ++i)
+  {
+    MenuComponent const* cp_m_comp = cp_menu->get_menu_component(i);
+    Serial.print(cp_m_comp->get_name());
+    
+    if (cp_menu_sel == cp_m_comp)
+      Serial.print("<<< ");
+    
+    Serial.println("");
+  }  
+}
+
+void serialHandler() {
+  char inChar;
+  if((inChar = Serial.read())>0) {
+    switch (inChar) {
+    case 'w': // Previus item
+      menu_principal.prev();
+      displayMenu();
+      break;
+    case 's': // Next item
+      menu_principal.next();
+      displayMenu();
+      break;
+    case 'a': // Back presed
+      menu_principal.back();
+      displayMenu();
+      break;
+    case 'd': // Select presed
+      menu_principal.select();
+      displayMenu();
+      break;
+    case '?':
+    case 'h': // Display help
+      serialPrintHelp();
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+void serialPrintHelp() {
+  Serial.println("***************");
+  Serial.println("w: go to previus item (up)");
+  Serial.println("s: go to next item (down)");
+  Serial.println("a: go back (right)");
+  Serial.println("d: select \"selected\" item");
+  Serial.println("?: print this help");
+  Serial.println("h: print this help");
+  Serial.println("***************");
 
 }
