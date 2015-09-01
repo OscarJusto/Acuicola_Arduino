@@ -18,6 +18,9 @@ MenuItem mc_sensor_3          ("<<     OD 2   >>");
 MenuItem mc_sensor_4          ("<<     OD 3   >>");
 MenuItem mc_sensor_5          ("<<     OD 4     ");
 
+volatile boolean BOTON_OPRIMIDO = false;
+volatile char BOTON_NOMBRE;
+
 void on_item1_selected(MenuItem* p_menu_item) {
   Serial.println("PH");
 }
@@ -87,12 +90,38 @@ void configurar_menu () {
   
 }
 
+void configurar_botones() {
+  attachInterrupt(0, ISR_W, RISING);
+  attachInterrupt(1, ISR_S, RISING);
+  attachInterrupt(4, ISR_D, RISING);
+  attachInterrupt(5, ISR_A, RISING);
+}
 
+void ISR_S() {
+  BOTON_OPRIMIDO = true;
+  BOTON_NOMBRE = 's';
+}
+
+void ISR_W() {
+  BOTON_OPRIMIDO = true;
+  BOTON_NOMBRE = 'w';
+}
+
+void ISR_D() {
+  BOTON_OPRIMIDO = true;
+  BOTON_NOMBRE = 'd';
+}
+
+void ISR_A() {
+  BOTON_OPRIMIDO = true;
+  BOTON_NOMBRE = 'a';
+}
 
 void setup() {
   
   Serial.begin(9600); 
-       
+  
+  configurar_botones();    
   configurar_menu();
   
   displayMenu();  
@@ -100,6 +129,7 @@ void setup() {
 
 void loop() {
   
+  buttonHandler();
   serialHandler();
 
 }
@@ -155,6 +185,31 @@ void serialHandler() {
     }
   }
 }
+
+void buttonHandler() {
+  if (BOTON_OPRIMIDO) {
+    BOTON_OPRIMIDO = false;
+    switch (BOTON_NOMBRE) {
+      case 'w': // Previos item
+          menu_principal.prev();
+          displayMenu();
+          break;
+      case 's': // Next item
+          menu_principal.next();
+          displayMenu();
+          break;
+      case 'a': // Back presed
+          menu_principal.back();
+          displayMenu();
+          break;
+      case 'd': // Select presed
+          menu_principal.select();
+          displayMenu();
+          break;
+    }
+  }
+}
+       
 
 void serialPrintHelp() {
   Serial.println("***************");
