@@ -1,6 +1,25 @@
+#include <DallasTemperature.h>
 #include <LiquidCrystal.h>
+#include <OneWire.h>
 #include <MenuSystem.h>
 
+#define ONE_WIRE_BUS  45
+#define TWO_WIRE_BUS  39
+#define THREE_WIRE_BUS 48
+#define FOUR_WIRE_BUS 47
+#define FIVE_WIRE_BUS 46
+
+OneWire oneWire(ONE_WIRE_BUS);
+OneWire twoWire(TWO_WIRE_BUS);
+OneWire threeWire(THREE_WIRE_BUS);
+OneWire fourWire(FOUR_WIRE_BUS);
+OneWire fiveWire(FIVE_WIRE_BUS);
+
+DallasTemperature sensors_one(&oneWire);
+DallasTemperature sensors_two(&twoWire);
+DallasTemperature sensors_three(&threeWire);
+DallasTemperature sensors_four(&fourWire);
+DallasTemperature sensors_five(&fiveWire);
 
 MenuSystem menu_principal;
 Menu menu_info                ("Info estanques >");
@@ -128,6 +147,11 @@ void setup() {
   
   Serial.begin(9600); 
   lcd.begin(16,2);
+  sensors_one.begin();
+  sensors_two.begin();
+  sensors_three.begin();
+  sensors_four.begin();
+  sensors_five.begin();
   
   configurar_botones();    
   configurar_menu();
