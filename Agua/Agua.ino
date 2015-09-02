@@ -1,4 +1,6 @@
+#include <LiquidCrystal.h>
 #include <MenuSystem.h>
+
 
 MenuSystem menu_principal;
 Menu menu_info                ("Info estanques >");
@@ -18,11 +20,16 @@ MenuItem mc_sensor_3          ("<<     OD 2   >>");
 MenuItem mc_sensor_4          ("<<     OD 3   >>");
 MenuItem mc_sensor_5          ("<<     OD 4     ");
 
+LiquidCrystal lcd(32,33,34,35,36,37);
+
 volatile boolean BOTON_OPRIMIDO = false;
 volatile char BOTON_NOMBRE;
 
 void on_item1_selected(MenuItem* p_menu_item) {
   Serial.println("PH");
+  lcd.setCursor(0,1);
+  lcd.print("       PH       ");
+  delay(2000);
 }
 
 void on_item2_selected(MenuItem* p_menu_item) {
@@ -120,10 +127,17 @@ void ISR_A() {
 void setup() {
   
   Serial.begin(9600); 
+  lcd.begin(16,2);
   
   configurar_botones();    
   configurar_menu();
   
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Eje Acuicola    ");
+  lcd.setCursor(0,1);
+  lcd.print("Version 0.1     ");
+  delay(2500);  
   displayMenu();  
 }
 
@@ -136,7 +150,7 @@ void loop() {
 
 void displayMenu() {
   
-  Serial.println("");
+  Serial.println(""); 
   // Display the menu
   Menu const* cp_menu = menu_principal.get_current_menu();
   
@@ -153,7 +167,14 @@ void displayMenu() {
       Serial.print("<<< ");
     
     Serial.println("");
-  }  
+  }
+  
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(cp_menu->get_name());
+  
+  lcd.setCursor(0,1);
+  lcd.print(cp_menu->get_selected()->get_name());
 }
 
 void serialHandler() {
