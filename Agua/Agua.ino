@@ -150,27 +150,10 @@ void loop() {
 
 void displayMenu() {
   
-  Serial.println(""); 
-  // Display the menu
-  Menu const* cp_menu = menu_principal.get_current_menu();
-  
-  Serial.print("Nombre del Menu: ");
-  Serial.println(cp_menu->get_name());
-  
-  MenuComponent const* cp_menu_sel = cp_menu->get_selected();
-  for (int i = 0; i < cp_menu->get_num_menu_components(); ++i)
-  {
-    MenuComponent const* cp_m_comp = cp_menu->get_menu_component(i);
-    Serial.print(cp_m_comp->get_name());
-    
-    if (cp_menu_sel == cp_m_comp)
-      Serial.print("<<< ");
-    
-    Serial.println("");
-  }
-  
   lcd.clear();
-  lcd.setCursor(0,0);
+  lcd.setCursor(0,0);  
+  // Display the menu
+  Menu const* cp_menu = menu_principal.get_current_menu();    
   lcd.print(cp_menu->get_name());
   
   lcd.setCursor(0,1);
