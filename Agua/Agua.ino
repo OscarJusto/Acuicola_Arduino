@@ -1,6 +1,8 @@
 #include <DallasTemperature.h>
 #include <LiquidCrystal.h>
 #include <OneWire.h>
+#include <PString.h>
+#include <XBee.h>
 #include <MenuSystem.h>
 
 #define ONE_WIRE_BUS  45
@@ -53,6 +55,24 @@ LiquidCrystal lcd(32,33,34,35,36,37);
 volatile boolean BOTON_OPRIMIDO = false;
 volatile char BOTON_NOMBRE;
 
+XBee xbee = XBee();
+
+String pzb;
+char val [20];
+
+//Funcion para ajustar payload xbee y enviar datos
+void sendInfoPayload(String info) {
+  char payload[1+info.length()];
+  PString infoString(payload, sizeof(payload));
+  infoString.print(info);
+  
+  // SH + SL Adrress of receiving XBee
+  XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x00000000);
+  ZBTxRequest zbTx = ZBTxRequest(addr64, (uint8_t *)payload, sizeof(payload));
+  
+  xbee.send(zbTx);
+}
+
 void printAddress(DeviceAddress deviceAddress) {
   
   for (uint8_t i = 0; i < 8; i++) {
@@ -70,8 +90,7 @@ void pedir_temperaturas() {
   sensors_four.requestTemperatures();
   sensors_five.requestTemperatures();
   
-}
-  
+}  
 
 void on_item1_selected(MenuItem* p_menu_item) {
   Serial.println("PH");
