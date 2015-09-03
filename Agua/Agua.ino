@@ -81,19 +81,19 @@ void on_item1_selected(MenuItem* p_menu_item) {
 }
 
 void on_item2_selected(MenuItem* p_menu_item) {
-  Serial.println("OD1_TEM1");  
+  print_LCD_TEMP(SENSOR_T1);  
 }
 
 void on_item3_selected(MenuItem* p_menu_item) {
-  Serial.println("OD2_TEM2");
+  print_LCD_TEMP(SENSOR_T2);
 }
 
 void on_item4_selected(MenuItem* p_menu_item) {
-  Serial.println("OD3_TEM3");
+  print_LCD_TEMP(SENSOR_T3);
 }
 
 void on_item5_selected(MenuItem* p_menu_item) {
-  Serial.println("OD4_TEM4");
+  print_LCD_TEMP(SENSOR_T4);
 }
 
 void on_cal1_selected(MenuItem* p_menu_item) {
@@ -331,11 +331,24 @@ void print_TEMP (int idx) {
    String pref = "T";
    int numidx = idx;
    float _T = leer_muestra(idx, "T");
-   Serial.print(pref + String(numidx) + ":");
+   Serial.print(pref + String(numidx) + ": ");
    Serial.println(_T);
    
  }
+ 
+void print_LCD_TEMP (int idx) {
 
+  String pref = "T";
+  int numidx = idx;
+  float _T = leer_muestra(idx, "T");
+  char tempod1[6];
+  String _Ts = dtostrf(_T, 1, 2, tempod1);
+  String msg = pref + String(numidx) + ": " + _Ts + " oC    ";
+  lcd.setCursor(0,1);
+  lcd.print(msg);
+  delay(5000);
+
+}
  
 float leer_muestra (int num_sensor, String tipo_sensor) {
    
