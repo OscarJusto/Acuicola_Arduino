@@ -201,7 +201,9 @@ void loop() {
   pedir_temperaturas();  
   buttonHandler();
   serialHandler();
-
+  
+  todas_temperaturas();
+  
 }
 
 void displayMenu() {
@@ -324,6 +326,18 @@ void leer_temperatura(int sensor) {
   } else if (sensor == 4) {
     temp = sensors_five.getTempC(sensores_temp[4]);
     Serial.print(temp);
+  }
+  
+}
+
+void todas_temperaturas() {
+  
+  for (int i=0; i<5; i++) {
+    Serial.print("T");
+    Serial.print(i, DEC);
+    Serial.print(": ");
+    leer_temperatura(i);
+    Serial.println();
   }
   
 }
