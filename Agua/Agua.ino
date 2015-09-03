@@ -24,6 +24,12 @@ DallasTemperature sensors_five(&fiveWire);
 DeviceAddress sensores_temp[5];
 int numberOfDevices;
 
+int SENSOR_T0 = 0;
+int SENSOR_T1 = 1;
+int SENSOR_T2 = 2;
+int SENSOR_T3 = 3;
+int SENSOR_T4 = 4;
+
 MenuSystem menu_principal;
 Menu menu_info                ("Info estanques >");
 MenuItem mi_estanque_1        ("   Estanque 1  >");
@@ -55,6 +61,17 @@ void printAddress(DeviceAddress deviceAddress) {
     Serial.print(deviceAddress[i], HEX);
   }
 }
+
+void pedir_temperaturas() {
+  
+  sensors_one.requestTemperatures();
+  sensors_two.requestTemperatures();
+  sensors_three.requestTemperatures();
+  sensors_four.requestTemperatures();
+  sensors_five.requestTemperatures();
+  
+}
+  
 
 void on_item1_selected(MenuItem* p_menu_item) {
   Serial.println("PH");
@@ -181,6 +198,7 @@ void setup() {
 
 void loop() {
   
+  pedir_temperaturas();  
   buttonHandler();
   serialHandler();
 
@@ -285,4 +303,27 @@ void imprimir_info() {
     printAddress(sensores_temp[i]);
     Serial.println();
   }
+}
+
+void leer_temperatura(int sensor) {
+  
+  float temp;
+  
+  if (sensor==0) {
+    temp = sensors_one.getTempC(sensores_temp[0]);
+    Serial.print(temp);
+  } else if (sensor == 1) {
+    temp = sensors_two.getTempC(sensores_temp[1]);
+    Serial.print(temp);
+  } else if (sensor == 2) {
+    temp = sensors_three.getTempC(sensores_temp[2]);
+    Serial.print(temp);
+  } else if (sensor == 3) {
+    temp = sensors_four.getTempC(sensores_temp[3]);
+    Serial.print(temp);
+  } else if (sensor == 4) {
+    temp = sensors_five.getTempC(sensores_temp[4]);
+    Serial.print(temp);
+  }
+  
 }
