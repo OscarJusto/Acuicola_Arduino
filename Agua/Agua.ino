@@ -60,6 +60,8 @@ XBee xbee = XBee();
 String pzb;
 char val [20];
 
+float T0, T1, T2, T3, T4;
+
 //Funcion para ajustar payload xbee y enviar datos
 void sendInfoPayload(String info) {
   char payload[1+info.length()];
@@ -193,7 +195,9 @@ void ISR_A() {
 
 void setup() {
   
-  Serial.begin(9600); 
+  Serial.begin(9600);
+  Serial3.begin(9600);
+  xbee.setSerial(Serial3);  
   lcd.begin(16,2);
   sensors_one.begin();
   sensors_two.begin();
@@ -220,15 +224,42 @@ void loop() {
   pedir_temperaturas();  
   buttonHandler();
   serialHandler();
-  
+/*  
   print_TEMP(0);
   print_TEMP(1);
   print_TEMP(2);
   print_TEMP(3);
   print_TEMP(4);
-  Serial.println();
-
+*/
+  
+  T0 = leer_temperatura(SENSOR_T0);
+  T1 = leer_temperatura(SENSOR_T1);
+  T2 = leer_temperatura(SENSOR_T2);
+  T3 = leer_temperatura(SENSOR_T3);
+  T4 = leer_temperatura(SENSOR_T4);
+  
+  String StringT0 = dtostrf(T0, 2,2, val);
+  String StringT1 = dtostrf(T1, 2,2, val);
+  String StringT2 = dtostrf(T2, 2,2, val);
+  String StringT3 = dtostrf(T3, 2,2, val);
+  String StringT4 = dtostrf(T4, 2,2, val);
+  
+  pzb = "";
+  
+  pzb  = StringT0;
+  pzb += " ";
+  pzb += StringT1;
+  pzb += " ";
+  pzb += StringT2;
+  pzb += " ";
+  pzb += StringT3;
+  pzb += " ";
+  pzb += StringT4;  
+   
+  Serial.println(pzb); 
+  
   //todas_temperaturas();
+  sendInfoPayload(pzb);
   
 }
 
