@@ -81,7 +81,7 @@ void on_item1_selected(MenuItem* p_menu_item) {
 }
 
 void on_item2_selected(MenuItem* p_menu_item) {
-  Serial.println("OD1_TEM1");
+  Serial.println("OD1_TEM1");  
 }
 
 void on_item3_selected(MenuItem* p_menu_item) {
@@ -202,7 +202,14 @@ void loop() {
   buttonHandler();
   serialHandler();
   
-  todas_temperaturas();
+  print_TEMP(0);
+  print_TEMP(1);
+  print_TEMP(2);
+  print_TEMP(3);
+  print_TEMP(4);
+  Serial.println();
+
+  //todas_temperaturas();
   
 }
 
@@ -307,29 +314,6 @@ void imprimir_info() {
   }
 }
 
-void leer_temperatura(int sensor) {
-  
-  float temp;
-  
-  if (sensor==0) {
-    temp = sensors_one.getTempC(sensores_temp[0]);
-    Serial.print(temp);
-  } else if (sensor == 1) {
-    temp = sensors_two.getTempC(sensores_temp[1]);
-    Serial.print(temp);
-  } else if (sensor == 2) {
-    temp = sensors_three.getTempC(sensores_temp[2]);
-    Serial.print(temp);
-  } else if (sensor == 3) {
-    temp = sensors_four.getTempC(sensores_temp[3]);
-    Serial.print(temp);
-  } else if (sensor == 4) {
-    temp = sensors_five.getTempC(sensores_temp[4]);
-    Serial.print(temp);
-  }
-  
-}
-
 void todas_temperaturas() {
   
   for (int i=0; i<5; i++) {
@@ -338,6 +322,41 @@ void todas_temperaturas() {
     Serial.print(": ");
     leer_temperatura(i);
     Serial.println();
+  }
+  
+}
+
+void print_TEMP (int idx) {
+  
+   String pref = "T";
+   int numidx = idx;
+   float _T = leer_muestra(idx, "T");
+   Serial.print(pref + String(numidx) + ":");
+   Serial.println(_T);
+   
+ }
+
+ 
+float leer_muestra (int num_sensor, String tipo_sensor) {
+   
+   if (tipo_sensor.equals("T")) {
+     return leer_temperatura(num_sensor);
+   }
+   return 0.0;
+ }
+ 
+float leer_temperatura(int sensor) {  
+  
+  if (sensor==0) {
+    return sensors_one.getTempC(sensores_temp[0]);    
+  } else if (sensor == 1) {
+    return sensors_two.getTempC(sensores_temp[1]);    
+  } else if (sensor == 2) {
+    return sensors_three.getTempC(sensores_temp[2]);    
+  } else if (sensor == 3) {
+    return sensors_four.getTempC(sensores_temp[3]);    
+  } else if (sensor == 4) {
+    return sensors_five.getTempC(sensores_temp[4]);    
   }
   
 }
