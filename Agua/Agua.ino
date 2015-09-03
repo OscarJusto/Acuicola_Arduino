@@ -21,6 +21,9 @@ DallasTemperature sensors_three(&threeWire);
 DallasTemperature sensors_four(&fourWire);
 DallasTemperature sensors_five(&fiveWire);
 
+DeviceAddress sensores_temp[5];
+int numberOfDevices;
+
 MenuSystem menu_principal;
 Menu menu_info                ("Info estanques >");
 MenuItem mi_estanque_1        ("   Estanque 1  >");
@@ -43,6 +46,15 @@ LiquidCrystal lcd(32,33,34,35,36,37);
 
 volatile boolean BOTON_OPRIMIDO = false;
 volatile char BOTON_NOMBRE;
+
+void printAddress(DeviceAddress deviceAddress) {
+  
+  for (uint8_t i = 0; i < 8; i++) {
+    
+    if (deviceAddress[i] <16) Serial.print("0");
+    Serial.print(deviceAddress[i], HEX);
+  }
+}
 
 void on_item1_selected(MenuItem* p_menu_item) {
   Serial.println("PH");
@@ -154,8 +166,10 @@ void setup() {
   sensors_five.begin();
   
   configurar_botones();    
-  configurar_menu();
   
+  imprimir_info();
+  configurar_menu();
+    
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Eje Acuicola    ");
@@ -249,4 +263,26 @@ void serialPrintHelp() {
   Serial.println("h: print this help");
   Serial.println("***************");
 
+}
+
+void imprimir_info() {
+  
+  numberOfDevices = sensors_one.getDeviceCount() + sensors_two.getDeviceCount() + sensors_three.getDeviceCount() + sensors_four.getDeviceCount() + sensors_five.getDeviceCount();
+  
+  Serial.print(numberOfDevices, DEC);
+  Serial.println(" DS18B20");
+      
+  if (!sensors_one.getAddress(sensores_temp[0], 0));
+  if (!sensors_two.getAddress(sensores_temp[1], 0));
+  if (!sensors_three.getAddress(sensores_temp[2], 0));
+  if (!sensors_four.getAddress(sensores_temp[3], 0));
+  if (!sensors_five.getAddress(sensores_temp[4], 0)); 
+    
+  for (int i=0; i<5; i++) {
+    Serial.print("T");
+    Serial.print(i, DEC);
+    Serial.print(": ");        
+    printAddress(sensores_temp[i]);
+    Serial.println();
+  }
 }
