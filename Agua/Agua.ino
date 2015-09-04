@@ -61,6 +61,7 @@ String pzb;
 char val [20];
 
 float T0, T1, T2, T3, T4;
+String StringT0, StringT1, StringT2, StringT3, StringT4;
 
 //Funcion para ajustar payload xbee y enviar datos
 void sendInfoPayload(String info) {
@@ -102,19 +103,23 @@ void on_item1_selected(MenuItem* p_menu_item) {
 }
 
 void on_item2_selected(MenuItem* p_menu_item) {
-  print_LCD_TEMP(SENSOR_T1);  
+  //print_LCD_TEMP(SENSOR_T1);
+  print_LCD_TEMP_SENSOR(SENSOR_T1);
 }
 
 void on_item3_selected(MenuItem* p_menu_item) {
-  print_LCD_TEMP(SENSOR_T2);
+  //print_LCD_TEMP(SENSOR_T2);
+  print_LCD_TEMP_SENSOR(SENSOR_T2);
 }
 
 void on_item4_selected(MenuItem* p_menu_item) {
-  print_LCD_TEMP(SENSOR_T3);
+  //print_LCD_TEMP(SENSOR_T3);
+  print_LCD_TEMP_SENSOR(SENSOR_T3);
 }
 
 void on_item5_selected(MenuItem* p_menu_item) {
-  print_LCD_TEMP(SENSOR_T4);
+  //print_LCD_TEMP(SENSOR_T4);
+  print_LCD_TEMP_SENSOR(SENSOR_T4);
 }
 
 void on_cal1_selected(MenuItem* p_menu_item) {
@@ -238,11 +243,11 @@ void loop() {
   T3 = leer_temperatura(SENSOR_T3);
   T4 = leer_temperatura(SENSOR_T4);
   
-  String StringT0 = dtostrf(T0, 2,2, val);
-  String StringT1 = dtostrf(T1, 2,2, val);
-  String StringT2 = dtostrf(T2, 2,2, val);
-  String StringT3 = dtostrf(T3, 2,2, val);
-  String StringT4 = dtostrf(T4, 2,2, val);
+  StringT0 = dtostrf(T0, 2,2, val);
+  StringT1 = dtostrf(T1, 2,2, val);
+  StringT2 = dtostrf(T2, 2,2, val);
+  StringT3 = dtostrf(T3, 2,2, val);
+  StringT4 = dtostrf(T4, 2,2, val);
   
   pzb = "";
   
@@ -423,3 +428,29 @@ float leer_temperatura(int sensor) {
   }
   
 }
+
+void print_LCD_TEMP_SENSOR (int idx) {
+
+  String pref = "T";
+  int numidx = idx;
+  String _numidx = String(numidx);
+  String msg;
+  if (numidx == 0) {
+    msg = pref + _numidx + ": " + StringT0 + " oC    ";
+  } else if (numidx == 1) {
+    msg = pref + _numidx + ": " + StringT1 + " oC    ";
+  } else if (numidx == 2) {
+    msg = pref + _numidx + ": " + StringT2 + " oC    ";
+  } else if (numidx == 3) {
+    msg = pref + _numidx + ": " + StringT3 + " oC    ";
+  } else if (numidx == 4) {
+    msg = pref + _numidx + ": " + StringT4 + " oC    ";
+  } else {
+    msg = "Error";
+  }
+  lcd.setCursor(0,1);
+  lcd.print(msg);
+  delay(5000);
+
+}
+  
