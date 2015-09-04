@@ -4,6 +4,8 @@
 #include <PString.h>
 #include <XBee.h>
 #include <MenuSystem.h>
+#include <avr/interrupt.h>
+#include <avr/io.h>
 
 #define ONE_WIRE_BUS  45
 #define TWO_WIRE_BUS  39
@@ -54,6 +56,9 @@ LiquidCrystal lcd(32,33,34,35,36,37);
 
 volatile boolean BOTON_OPRIMIDO = false;
 volatile char BOTON_NOMBRE;
+volatile int seconds = 10;      //Tiempo para inciar el programa del timer1
+volatile int samples = 5;       //Tiempo para enviar muestras de lecturas
+volatile int count_samples = 0; //Contador para muestreo de lecturas 
 
 XBee xbee = XBee();
 
@@ -198,6 +203,26 @@ void ISR_A() {
   BOTON_NOMBRE = 'a';
 }
 
+ISR(TIMER1_COMPA_vect) {
+  
+  seconds --;
+  
+  if (seconds <= 0) {
+    
+    seconds = 0;
+    count_samples ++;    
+    
+  }
+    
+  if (count_samples >= samples) {
+    
+    count_samples = 0;        
+    sendInfoPayload(pzb);
+    
+  }
+  
+}
+
 void setup() {
   
   Serial.begin(9600);
@@ -214,6 +239,26 @@ void setup() {
   
   imprimir_info();
   configurar_menu();
+  
+  //incializar Timer1
+  cli();                //interupciones de parada global
+  TCCR1A = 0;           //establece todo el registro TCRR1 a 0
+  TCCR1B = 0;           //hacel lo mismo
+  //Establcer el registro de comparacin para la cuenta del timer deseada
+  OCR1A = 15624; // 1-> Seg
+  //OCR1A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
+  //OCR1A =3905.25; // = (16MHz)/(1024*4) -1 = 31249 (debe ser < 65536) -> 0.25 Seg
+  //Turna en modo CTC:
+  TCCR1B |= (1 << WGM12);
+  //Ajusta los bits de CS10 y CS12 a 1024 prescaler
+  TCCR1B |= (1 << CS10);
+  TCCR1B |= (1 << CS12);
+  //Permite al timer comparar la interrupcion en Modo CTC
+  TIMSK1 |= (1 << OCIE1A);
+  //Permite al timer1 interrupcion por desbordamiento
+  //TIMSK1 = (1 << TOIE1);
+  //habilita las interrupciones globales
+  sei();  
     
   lcd.clear();
   lcd.setCursor(0,0);
@@ -261,10 +306,12 @@ void loop() {
   pzb += " ";
   pzb += StringT4;  
    
-  Serial.println(pzb); 
+  Serial.println(pzb);
+
   
   //todas_temperaturas();
-  sendInfoPayload(pzb);
+  //sendInfoPayload(pzb);
+  //delay(100);
   
 }
 
@@ -450,7 +497,7 @@ void print_LCD_TEMP_SENSOR (int idx) {
   }
   lcd.setCursor(0,1);
   lcd.print(msg);
-  delay(5000);
+  delay(2500);
 
 }
   
