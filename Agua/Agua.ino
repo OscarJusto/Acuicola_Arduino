@@ -1,4 +1,5 @@
 #include <DallasTemperature.h>
+#include <SoftwareSerial.h>
 #include <LiquidCrystal.h>
 #include <OneWire.h>
 #include <PString.h>
@@ -6,6 +7,23 @@
 #include <MenuSystem.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
+
+#define RX_OD_1 10
+#define TX_OD_1 6
+
+#define RX_OD_2 11
+#define TX_OD_2 7
+
+#define RX_OD_3 12
+#define TX_OD_3 8
+
+#define RX_OD_4 13
+#define TX_OD_4 9
+
+SoftwareSerial sensor_OD1 (RX_OD_1, TX_OD_1);
+SoftwareSerial sensor_OD2 (RX_OD_2, TX_OD_2);
+SoftwareSerial sensor_OD3 (RX_OD_3, TX_OD_3);
+SoftwareSerial sensor_OD4 (RX_OD_4, TX_OD_4);
 
 #define ONE_WIRE_BUS  45
 #define TWO_WIRE_BUS  39
@@ -451,30 +469,6 @@ void print_LCD_TEMP (int idx) {
   delay(5000);
 
 }
- 
-float leer_muestra (int num_sensor, String tipo_sensor) {
-   
-   if (tipo_sensor.equals("T")) {
-     return leer_temperatura(num_sensor);
-   }
-   return 0.0;
- }
- 
-float leer_temperatura(int sensor) {  
-  
-  if (sensor==0) {
-    return sensors_one.getTempC(sensores_temp[0]);    
-  } else if (sensor == 1) {
-    return sensors_two.getTempC(sensores_temp[1]);    
-  } else if (sensor == 2) {
-    return sensors_three.getTempC(sensores_temp[2]);    
-  } else if (sensor == 3) {
-    return sensors_four.getTempC(sensores_temp[3]);    
-  } else if (sensor == 4) {
-    return sensors_five.getTempC(sensores_temp[4]);    
-  }
-  
-}
 
 void print_LCD_TEMP_SENSOR (int idx) {
 
@@ -499,5 +493,29 @@ void print_LCD_TEMP_SENSOR (int idx) {
   lcd.print(msg);
   delay(2500);
 
+}
+ 
+float leer_muestra (int num_sensor, String tipo_sensor) {
+   
+   if (tipo_sensor.equals("T")) {
+     return leer_temperatura(num_sensor);
+   }
+   return 0.0;
+ }
+ 
+float leer_temperatura(int sensor) {  
+  
+  if (sensor==0) {
+    return sensors_one.getTempC(sensores_temp[0]);    
+  } else if (sensor == 1) {
+    return sensors_two.getTempC(sensores_temp[1]);    
+  } else if (sensor == 2) {
+    return sensors_three.getTempC(sensores_temp[2]);    
+  } else if (sensor == 3) {
+    return sensors_four.getTempC(sensores_temp[3]);    
+  } else if (sensor == 4) {
+    return sensors_five.getTempC(sensores_temp[4]);    
+  }
+  
 }
   
