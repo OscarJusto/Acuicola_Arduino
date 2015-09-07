@@ -128,25 +128,25 @@ void on_item1_selected(MenuItem* p_menu_item) {
 void on_item2_selected(MenuItem* p_menu_item) {
   //print_LCD_TEMP(SENSOR_T1);
   print_LCD_TEMP_SENSOR(SENSOR_T1);
-  print_OD(SENSOR_OD1);
+  print_OD_LCD(SENSOR_OD1);
 }
 
 void on_item3_selected(MenuItem* p_menu_item) {
   //print_LCD_TEMP(SENSOR_T2);
   print_LCD_TEMP_SENSOR(SENSOR_T2);
-  print_OD(SENSOR_OD2);
+  print_OD_LCD(SENSOR_OD2);
 }
 
 void on_item4_selected(MenuItem* p_menu_item) {
   //print_LCD_TEMP(SENSOR_T3);
   print_LCD_TEMP_SENSOR(SENSOR_T3);
-  print_OD(SENSOR_OD3);
+  print_OD_LCD(SENSOR_OD3);
 }
 
 void on_item5_selected(MenuItem* p_menu_item) {
   //print_LCD_TEMP(SENSOR_T4);
   print_LCD_TEMP_SENSOR(SENSOR_T4);
-  print_OD(SENSOR_OD4);
+  print_OD_LCD(SENSOR_OD4);
 }
 
 void on_cal1_selected(MenuItem* p_menu_item) {
@@ -508,9 +508,23 @@ void print_OD (int idx) {
   
   String pref = "OD";
   int numidx = idx;
-  float _OD = leer_muestra(idx, "OD");
+  float OD = leer_muestra(idx, "OD");
   Serial.print(pref + String(numidx) + ": ");
-  Serial.println(_OD);
+  Serial.println(OD);
+}
+
+void print_OD_LCD (int idx) {
+  
+  String pref = "OD";
+  int numidx = idx;
+  float OD = leer_muestra(idx, "OD");
+  char tempod1[6];
+  String _OD = dtostrf(OD, 1, 2, tempod1);
+  String msg = pref + String(numidx) + ": " + _OD + " mg/L  " ;
+  lcd.setCursor(0,1);
+  lcd.print(msg);
+  delay(2500);
+  
 }
  
 float leer_muestra (int num_sensor, String tipo_sensor) {
