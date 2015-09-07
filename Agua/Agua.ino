@@ -8,22 +8,22 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
-#define RX_OD_1 10
-#define TX_OD_1 6
+#define RX_OD_1 13
+#define TX_OD_1 9
 
-#define RX_OD_2 11
-#define TX_OD_2 7
+#define RX_OD_2 12
+#define TX_OD_2 8
 
-#define RX_OD_3 12
-#define TX_OD_3 8
+#define RX_OD_3 11
+#define TX_OD_3 7
 
-#define RX_OD_4 13
-#define TX_OD_4 9
+#define RX_OD_4 10
+#define TX_OD_4 6
 
-SoftwareSerial sensor_OD1 (RX_OD_1, TX_OD_1);
-SoftwareSerial sensor_OD2 (RX_OD_2, TX_OD_2);
-SoftwareSerial sensor_OD3 (RX_OD_3, TX_OD_3);
-SoftwareSerial sensor_OD4 (RX_OD_4, TX_OD_4);
+SoftwareSerial sensor_OD_1 (RX_OD_1, TX_OD_1);
+SoftwareSerial sensor_OD_2 (RX_OD_2, TX_OD_2);
+SoftwareSerial sensor_OD_3 (RX_OD_3, TX_OD_3);
+SoftwareSerial sensor_OD_4 (RX_OD_4, TX_OD_4);
 
 #define ONE_WIRE_BUS  45
 #define TWO_WIRE_BUS  39
@@ -47,10 +47,10 @@ DeviceAddress sensores_temp[5];
 int numberOfDevices;
 
 int SENSOR_T0 = 0;
-int SENSOR_T1 = 1;
-int SENSOR_T2 = 2;
-int SENSOR_T3 = 3;
-int SENSOR_T4 = 4;
+int SENSOR_T1 = 1;    int SENSOR_OD1 = 1;
+int SENSOR_T2 = 2;    int SENSOR_OD2 = 2;
+int SENSOR_T3 = 3;    int SENSOR_OD3 = 3;
+int SENSOR_T4 = 4;    int SENSOR_OD4 = 4;
 
 MenuSystem menu_principal;
 Menu menu_info                ("Info estanques >");
@@ -128,21 +128,25 @@ void on_item1_selected(MenuItem* p_menu_item) {
 void on_item2_selected(MenuItem* p_menu_item) {
   //print_LCD_TEMP(SENSOR_T1);
   print_LCD_TEMP_SENSOR(SENSOR_T1);
+  print_OD(SENSOR_OD1);
 }
 
 void on_item3_selected(MenuItem* p_menu_item) {
   //print_LCD_TEMP(SENSOR_T2);
   print_LCD_TEMP_SENSOR(SENSOR_T2);
+  print_OD(SENSOR_OD2);
 }
 
 void on_item4_selected(MenuItem* p_menu_item) {
   //print_LCD_TEMP(SENSOR_T3);
   print_LCD_TEMP_SENSOR(SENSOR_T3);
+  print_OD(SENSOR_OD3);
 }
 
 void on_item5_selected(MenuItem* p_menu_item) {
   //print_LCD_TEMP(SENSOR_T4);
   print_LCD_TEMP_SENSOR(SENSOR_T4);
+  print_OD(SENSOR_OD4);
 }
 
 void on_cal1_selected(MenuItem* p_menu_item) {
@@ -252,6 +256,11 @@ void setup() {
   sensors_three.begin();
   sensors_four.begin();
   sensors_five.begin();
+  
+  sensor_OD_1.begin(38400);
+  sensor_OD_2.begin(38400);
+  sensor_OD_3.begin(38400);
+  sensor_OD_4.begin(38400);
   
   configurar_botones();    
   
@@ -454,7 +463,7 @@ void print_TEMP (int idx) {
    Serial.print(pref + String(numidx) + ": ");
    Serial.println(_T);
    
- }
+ }  
  
 void print_LCD_TEMP (int idx) {
 
@@ -494,11 +503,22 @@ void print_LCD_TEMP_SENSOR (int idx) {
   delay(2500);
 
 }
+
+void print_OD (int idx) {
+  
+  String pref = "OD";
+  int numidx = idx;
+  float _OD = leer_muestra(idx, "OD");
+  Serial.print(pref + String(numidx) + ": ");
+  Serial.println(_OD);
+}
  
 float leer_muestra (int num_sensor, String tipo_sensor) {
    
    if (tipo_sensor.equals("T")) {
      return leer_temperatura(num_sensor);
+   } else if (tipo_sensor.equals("OD")) {
+     return leer_OD(num_sensor);
    }
    return 0.0;
  }
@@ -518,4 +538,47 @@ float leer_temperatura(int sensor) {
   }
   
 }
+
+float leer_OD(int num_sensor) {
   
+  byte rec = 0;
+  char data[20];
+  
+  if (num_sensor == 1) {
+    sensor_OD_1.listen();
+    sensor_OD_1.print("r\r");
+    delay(250);
+    if (sensor_OD_1.available() > 0) {
+      rec = sensor_OD_1.readBytesUntil('\r', data, sizeof (data) - 1);
+      data[rec] = 0;
+    }
+    return atof(data);
+  } else if (num_sensor == 2) {
+    sensor_OD_2.listen();
+    sensor_OD_2.print("r\r");
+    delay(250);
+    if (sensor_OD_2.available() > 0) {
+      rec = sensor_OD_2.readBytesUntil('\r', data, sizeof (data) - 1);
+      data[rec] = 0;
+    }
+    return atof(data);
+  } else if (num_sensor == 3) {
+    sensor_OD_3.listen();
+    sensor_OD_3.print("r\r");
+    delay(250);
+    if (sensor_OD_3.available() > 0) {
+      rec = sensor_OD_3.readBytesUntil('\r', data, sizeof (data) - 1);
+      data[rec] = 0;
+    }
+    return atof(data);
+  } else if (num_sensor == 4) {
+    sensor_OD_4.listen();
+    sensor_OD_4.print("r\r");
+    delay(250);
+    if (sensor_OD_4.available() > 0) {
+      rec = sensor_OD_4.readBytesUntil('\r', data, sizeof (data) - 1);
+      data[rec] = 0;
+    }
+    return atof(data);
+  }
+}
