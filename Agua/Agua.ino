@@ -75,12 +75,12 @@ LiquidCrystal lcd(32,33,34,35,36,37);
 volatile boolean BOTON_OPRIMIDO = false;
 volatile char BOTON_NOMBRE;
 
-volatile int seconds = 10;      //Tiempo para inciar el programa del timer1
+volatile int seconds = 0;      //Tiempo para inciar el programa del timer1
 volatile int samples = 5;       //Tiempo para enviar muestras de lecturas
 volatile int count_samples = 0; //Contador para muestreo de lecturas
 
-volatile int seconds_3 = 20;      //Tiempo para inciar el programa del timer3
-volatile int samples_3 = 5;       //Tiempo para enviar muestras de lecturas
+volatile int seconds_3 = 10;      //Tiempo para inciar el programa del timer3
+volatile int samples_3 = 25;       //Tiempo para enviar muestras de lecturas
 volatile int count_samples_3 = 0; //Contador para muestreo de lecturas 
 
 XBee xbee = XBee();
@@ -234,37 +234,75 @@ void ISR_A() {
 
 ISR(TIMER1_COMPA_vect) {
   
-  seconds --;
+  seconds ++;
   
-  if (seconds <= 0) {
+  if (seconds >= 40) {
     
     seconds = 0;
-    count_samples ++;
     
-  }
+    pedir_temperaturas();
+    T0 = leer_temperatura(SENSOR_T0);
+    T1 = leer_temperatura(SENSOR_T1);
+    T2 = leer_temperatura(SENSOR_T2);
+    T3 = leer_temperatura(SENSOR_T3);
+    T4 = leer_temperatura(SENSOR_T4);
     
-  if (count_samples >= samples) {
+    OD1 = leer_OD(SENSOR_OD1);
+    OD2 = leer_OD(SENSOR_OD2);
+    OD3 = leer_OD(SENSOR_OD3);
+    OD4 = leer_OD(SENSOR_OD4);
     
-    count_samples = 0;        
-    sendInfoPayload(pzb);
+    StringT0 = dtostrf(T0, 2,2, val);
+    StringT1 = dtostrf(T1, 2,2, val);
+    StringT2 = dtostrf(T2, 2,2, val);
+    StringT3 = dtostrf(T3, 2,2, val);
+    StringT4 = dtostrf(T4, 2,2, val);
     
-  }
-  
+    StringOD1 = dtostrf(OD1, 1,2, val);
+    StringOD2 = dtostrf(OD2, 1,2, val);
+    StringOD3 = dtostrf(OD3, 1,2, val);
+    StringOD4 = dtostrf(OD4, 1,2, val);
+    
+    pzb = "";
+    
+    pzb  = StringT0;
+    pzb += " ";
+    pzb += StringT1;
+    pzb += " ";
+    pzb += StringT2;
+    pzb += " ";
+    pzb += StringT3;
+    pzb += " ";
+    pzb += StringT4;
+    pzb += " ";
+    pzb += StringOD1;
+    pzb += " ";
+    pzb += StringOD2;
+    pzb += " ";
+    pzb += StringOD3;
+    pzb += " ";
+    pzb += StringOD4;
+     
+    Serial.println(pzb);
+  }  
 }
 
 ISR(TIMER3_COMPA_vect) {
   
   seconds_3 --;
    
-  if (seconds_3 >= 0) {
+  if (seconds_3 <= 0) {
     
     seconds_3 = 0;
     count_samples_3 ++;
     
-    Serial.println("Hola");
-    
   }
-  
+    
+  if (count_samples_3 >= samples_3) {
+    
+    count_samples_3 = 0;        
+    sendInfoPayload(pzb);
+  }  
 }
 
 void setup() {
@@ -294,8 +332,8 @@ void setup() {
   TCCR1A = 0;           //establece todo el registro TCRR1 a 0
   TCCR1B = 0;           //hacel lo mismo
   //Establcer el registro de comparacin para la cuenta del timer deseada
-  OCR1A = 15624; // 1-> Seg
-  //OCR1A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
+  //OCR1A = 15624; // 1-> Seg
+  OCR1A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
   //OCR1A =3905.25; // = (16MHz)/(1024*4) -1 = 31249 (debe ser < 65536) -> 0.25 Seg
   //Turna en modo CTC:
   TCCR1B |= (1 << WGM12);
@@ -314,8 +352,8 @@ void setup() {
   TCCR3A = 0;           //establece todo el registro TCRR1 a 0
   TCCR3B = 0;           //hacel lo mismo
   //Establcer el registro de comparacin para la cuenta del timer deseada
-  //OCR3A = 15624; // 1-> Seg
-  OCR3A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
+  OCR3A = 15624; // 1-> Seg
+  //OCR3A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
   //OCR1A =3905.25; // = (16MHz)/(1024*4) -1 = 31249 (debe ser < 65536) -> 0.25 Seg
   //Turna en modo CTC:
   TCCR3B |= (1 << WGM32);
@@ -342,7 +380,7 @@ void loop() {
      
   buttonHandler();
   serialHandler();
-  
+/*  
   pedir_temperaturas();
   T0 = leer_temperatura(SENSOR_T0);
   T1 = leer_temperatura(SENSOR_T1);
@@ -387,10 +425,10 @@ void loop() {
   pzb += StringOD4;
    
   Serial.println(pzb);
-  
+*/  
   //todas_temperaturas();
   //sendInfoPayload(pzb);
-  //delay(100);
+  delay(1000);
 }
 
 void displayMenu() {
