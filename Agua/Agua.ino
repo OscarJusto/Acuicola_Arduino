@@ -74,9 +74,14 @@ LiquidCrystal lcd(32,33,34,35,36,37);
 
 volatile boolean BOTON_OPRIMIDO = false;
 volatile char BOTON_NOMBRE;
+
 volatile int seconds = 10;      //Tiempo para inciar el programa del timer1
 volatile int samples = 5;       //Tiempo para enviar muestras de lecturas
-volatile int count_samples = 0; //Contador para muestreo de lecturas 
+volatile int count_samples = 0; //Contador para muestreo de lecturas
+
+volatile int seconds_3 = 0;      //Tiempo para inciar el programa del timer1
+volatile int samples_3 = 5;       //Tiempo para enviar muestras de lecturas
+volatile int count_samples_3 = 0; //Contador para muestreo de lecturas 
 
 XBee xbee = XBee();
 
@@ -247,6 +252,21 @@ ISR(TIMER1_COMPA_vect) {
   
 }
 
+ISR(TIMER3_COMPA_vect) {
+  
+  seconds_3 ++;
+   
+  if (seconds_3 >= 25) {
+    
+    seconds_3 = 0;
+    
+    //OD1 = leer_OD(SENSOR_OD1);
+    Serial.println("OD");
+  
+  }
+  
+}
+
 void setup() {
   
   Serial.begin(9600);
@@ -287,6 +307,26 @@ void setup() {
   //Permite al timer1 interrupcion por desbordamiento
   //TIMSK1 = (1 << TOIE1);
   //habilita las interrupciones globales
+  //sei();
+  
+  //incializar Timer3
+  //cli();                //interupciones de parada global
+  TCCR3A = 0;           //establece todo el registro TCRR1 a 0
+  TCCR3B = 0;           //hacel lo mismo
+  //Establcer el registro de comparacin para la cuenta del timer deseada
+  OCR3A = 15624; // 1-> Seg
+  //OCR1A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
+  //OCR1A =3905.25; // = (16MHz)/(1024*4) -1 = 31249 (debe ser < 65536) -> 0.25 Seg
+  //Turna en modo CTC:
+  TCCR3B |= (1 << WGM12);
+  //Ajusta los bits de CS10 y CS12 a 1024 prescaler
+  TCCR3B |= (1 << CS10);
+  TCCR3B |= (1 << CS12);
+  //Permite al timer comparar la interrupcion en Modo CTC
+  TIMSK3 |= (1 << OCIE3A);
+  //Permite al timer1 interrupcion por desbordamiento
+  //TIMSK1 = (1 << TOIE1);
+  //habilita las interrupciones globales
   sei();  
     
   lcd.clear();
@@ -318,6 +358,9 @@ void loop() {
   T4 = leer_temperatura(SENSOR_T4);
 
   OD1 = leer_OD(SENSOR_OD1);
+  OD2 = leer_OD(SENSOR_OD2);
+  OD3 = leer_OD(SENSOR_OD3);
+  OD4 = leer_OD(SENSOR_OD4);
   
   StringT0 = dtostrf(T0, 2,2, val);
   StringT1 = dtostrf(T1, 2,2, val);
@@ -326,6 +369,9 @@ void loop() {
   StringT4 = dtostrf(T4, 2,2, val);
   
   StringOD1 = dtostrf(OD1, 1,2, val);
+  StringOD2 = dtostrf(OD2, 1,2, val);
+  StringOD3 = dtostrf(OD3, 1,2, val);
+  StringOD4 = dtostrf(OD4, 1,2, val);
   
   pzb = "";
   
@@ -340,6 +386,12 @@ void loop() {
   pzb += StringT4;
   pzb += " ";
   pzb += StringOD1;
+  pzb += " ";
+  pzb += StringOD2;
+  pzb += " ";
+  pzb += StringOD3;
+  pzb += " ";
+  pzb += StringOD4;
    
   Serial.println(pzb);
 
@@ -565,13 +617,13 @@ float leer_OD(int num_sensor) {
   
   byte rec = 0;
   char data[20];
-  String comp;
+  //String comp;
   
   if (num_sensor == 1) {
     sensor_OD_1.listen();
-    comp = StringT1 + "\r" ;  
-    sensor_OD_1.print(comp);
-    delay(250);   
+    //comp = StringT1 + "\r" ;  
+    //sensor_OD_1.print(comp);
+    //delay(250);   
     sensor_OD_1.print("r\r");
     delay(250);
     if (sensor_OD_1.available() > 0) {
@@ -581,9 +633,9 @@ float leer_OD(int num_sensor) {
     return atof(data);
   } else if (num_sensor == 2) {
     sensor_OD_2.listen();
-    comp = StringT2 + "\r" ;
-    sensor_OD_2.print(comp);
-    delay(250);
+    //comp = StringT2 + "\r" ;
+    //sensor_OD_2.print(comp);
+    //delay(250);
     sensor_OD_2.print("r\r");
     delay(250);
     if (sensor_OD_2.available() > 0) {
@@ -593,9 +645,9 @@ float leer_OD(int num_sensor) {
     return atof(data);
   } else if (num_sensor == 3) {
     sensor_OD_3.listen();
-    comp = StringT3 + "\r" ;
-    sensor_OD_3.print(comp);
-    delay(250);
+    //comp = StringT3 + "\r" ;
+    //sensor_OD_3.print(comp);
+    //delay(250);
     sensor_OD_3.print("r\r");
     delay(250);
     if (sensor_OD_3.available() > 0) {
@@ -605,9 +657,9 @@ float leer_OD(int num_sensor) {
     return atof(data);
   } else if (num_sensor == 4) {
     sensor_OD_4.listen();
-    comp = StringT4 + "\r" ;
-    sensor_OD_4.print(comp);
-    delay(250);
+    //comp = StringT4 + "\r" ;
+    //sensor_OD_4.print(comp);
+    //delay(250);
     sensor_OD_4.print("r\r");
     delay(250);
     if (sensor_OD_4.available() > 0) {
