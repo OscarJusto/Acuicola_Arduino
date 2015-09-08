@@ -79,7 +79,7 @@ volatile int seconds = 10;      //Tiempo para inciar el programa del timer1
 volatile int samples = 5;       //Tiempo para enviar muestras de lecturas
 volatile int count_samples = 0; //Contador para muestreo de lecturas
 
-volatile int seconds_3 = 0;      //Tiempo para inciar el programa del timer1
+volatile int seconds_3 = 20;      //Tiempo para inciar el programa del timer3
 volatile int samples_3 = 5;       //Tiempo para enviar muestras de lecturas
 volatile int count_samples_3 = 0; //Contador para muestreo de lecturas 
 
@@ -239,7 +239,7 @@ ISR(TIMER1_COMPA_vect) {
   if (seconds <= 0) {
     
     seconds = 0;
-    count_samples ++;    
+    count_samples ++;
     
   }
     
@@ -254,15 +254,15 @@ ISR(TIMER1_COMPA_vect) {
 
 ISR(TIMER3_COMPA_vect) {
   
-  seconds_3 ++;
+  seconds_3 --;
    
-  if (seconds_3 >= 25) {
+  if (seconds_3 >= 0) {
     
     seconds_3 = 0;
+    count_samples_3 ++;
     
-    //OD1 = leer_OD(SENSOR_OD1);
-    Serial.println("OD");
-  
+    Serial.println("Hola");
+    
   }
   
 }
@@ -314,14 +314,14 @@ void setup() {
   TCCR3A = 0;           //establece todo el registro TCRR1 a 0
   TCCR3B = 0;           //hacel lo mismo
   //Establcer el registro de comparacin para la cuenta del timer deseada
-  OCR3A = 15624; // 1-> Seg
-  //OCR1A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
+  //OCR3A = 15624; // 1-> Seg
+  OCR3A =7811.5; // = (16MHz)/(1024*2) -1 = 31249 (debe ser < 65536) -> 0.5 Seg
   //OCR1A =3905.25; // = (16MHz)/(1024*4) -1 = 31249 (debe ser < 65536) -> 0.25 Seg
   //Turna en modo CTC:
-  TCCR3B |= (1 << WGM12);
+  TCCR3B |= (1 << WGM32);
   //Ajusta los bits de CS10 y CS12 a 1024 prescaler
-  TCCR3B |= (1 << CS10);
-  TCCR3B |= (1 << CS12);
+  TCCR3B |= (1 << CS30);
+  TCCR3B |= (1 << CS32);
   //Permite al timer comparar la interrupcion en Modo CTC
   TIMSK3 |= (1 << OCIE3A);
   //Permite al timer1 interrupcion por desbordamiento
@@ -339,18 +339,11 @@ void setup() {
 }
 
 void loop() {
-  
-  pedir_temperaturas();  
+     
   buttonHandler();
   serialHandler();
-/*  
-  print_TEMP(0);
-  print_TEMP(1);
-  print_TEMP(2);
-  print_TEMP(3);
-  print_TEMP(4);
-*/
   
+  pedir_temperaturas();
   T0 = leer_temperatura(SENSOR_T0);
   T1 = leer_temperatura(SENSOR_T1);
   T2 = leer_temperatura(SENSOR_T2);
@@ -394,12 +387,10 @@ void loop() {
   pzb += StringOD4;
    
   Serial.println(pzb);
-
   
   //todas_temperaturas();
   //sendInfoPayload(pzb);
   //delay(100);
-  
 }
 
 void displayMenu() {
