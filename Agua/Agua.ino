@@ -84,7 +84,9 @@ String pzb;
 char val [20];
 
 float T0, T1, T2, T3, T4;
+float OD1, OD2, OD3, OD4;
 String StringT0, StringT1, StringT2, StringT3, StringT4;
+String StringOD1, StringOD2, StringOD3, StringOD4;
 
 //Funcion para ajustar payload xbee y enviar datos
 void sendInfoPayload(String info) {
@@ -314,12 +316,16 @@ void loop() {
   T2 = leer_temperatura(SENSOR_T2);
   T3 = leer_temperatura(SENSOR_T3);
   T4 = leer_temperatura(SENSOR_T4);
+
+  OD1 = leer_OD(SENSOR_OD1);
   
   StringT0 = dtostrf(T0, 2,2, val);
   StringT1 = dtostrf(T1, 2,2, val);
   StringT2 = dtostrf(T2, 2,2, val);
   StringT3 = dtostrf(T3, 2,2, val);
   StringT4 = dtostrf(T4, 2,2, val);
+  
+  StringOD1 = dtostrf(OD1, 1,2, val);
   
   pzb = "";
   
@@ -331,7 +337,9 @@ void loop() {
   pzb += " ";
   pzb += StringT3;
   pzb += " ";
-  pzb += StringT4;  
+  pzb += StringT4;
+  pzb += " ";
+  pzb += StringOD1;
    
   Serial.println(pzb);
 
