@@ -557,9 +557,13 @@ float leer_OD(int num_sensor) {
   
   byte rec = 0;
   char data[20];
+  String comp;
   
   if (num_sensor == 1) {
     sensor_OD_1.listen();
+    comp = StringT1 + "\r" ;  
+    sensor_OD_1.print(comp);
+    delay(250);   
     sensor_OD_1.print("r\r");
     delay(250);
     if (sensor_OD_1.available() > 0) {
@@ -569,6 +573,9 @@ float leer_OD(int num_sensor) {
     return atof(data);
   } else if (num_sensor == 2) {
     sensor_OD_2.listen();
+    comp = StringT2 + "\r" ;
+    sensor_OD_2.print(comp);
+    delay(250);
     sensor_OD_2.print("r\r");
     delay(250);
     if (sensor_OD_2.available() > 0) {
@@ -578,6 +585,9 @@ float leer_OD(int num_sensor) {
     return atof(data);
   } else if (num_sensor == 3) {
     sensor_OD_3.listen();
+    comp = StringT3 + "\r" ;
+    sensor_OD_3.print(comp);
+    delay(250);
     sensor_OD_3.print("r\r");
     delay(250);
     if (sensor_OD_3.available() > 0) {
@@ -587,6 +597,9 @@ float leer_OD(int num_sensor) {
     return atof(data);
   } else if (num_sensor == 4) {
     sensor_OD_4.listen();
+    comp = StringT4 + "\r" ;
+    sensor_OD_4.print(comp);
+    delay(250);
     sensor_OD_4.print("r\r");
     delay(250);
     if (sensor_OD_4.available() > 0) {
