@@ -133,28 +133,24 @@ void on_item1_selected(MenuItem* p_menu_item) {
   delay(2000);
 }
 
-void on_item2_selected(MenuItem* p_menu_item) {
-  //print_LCD_TEMP(SENSOR_T1);
+void on_item2_selected(MenuItem* p_menu_item) {  
   print_LCD_TEMP_SENSOR(SENSOR_T1);
-  print_OD_LCD(SENSOR_OD1);
+  print_LCD_OD_SENSOR(SENSOR_OD1);
 }
 
-void on_item3_selected(MenuItem* p_menu_item) {
-  //print_LCD_TEMP(SENSOR_T2);
+void on_item3_selected(MenuItem* p_menu_item) {  
   print_LCD_TEMP_SENSOR(SENSOR_T2);
-  print_OD_LCD(SENSOR_OD2);
+  print_LCD_OD_SENSOR(SENSOR_OD2);
 }
 
-void on_item4_selected(MenuItem* p_menu_item) {
-  //print_LCD_TEMP(SENSOR_T3);
+void on_item4_selected(MenuItem* p_menu_item) {  
   print_LCD_TEMP_SENSOR(SENSOR_T3);
-  print_OD_LCD(SENSOR_OD3);
+  print_LCD_OD_SENSOR(SENSOR_OD3);
 }
 
-void on_item5_selected(MenuItem* p_menu_item) {
-  //print_LCD_TEMP(SENSOR_T4);
+void on_item5_selected(MenuItem* p_menu_item) {  
   print_LCD_TEMP_SENSOR(SENSOR_T4);
-  print_OD_LCD(SENSOR_OD4);
+  print_LCD_OD_SENSOR(SENSOR_OD4);
 }
 
 void on_cal1_selected(MenuItem* p_menu_item) {
@@ -617,6 +613,29 @@ void print_OD_LCD (int idx) {
   lcd.print(msg);
   delay(2500);
   
+}
+
+void print_LCD_OD_SENSOR (int idx) {
+
+  String pref = "OD";
+  int numidx = idx;
+  String _numidx = String(numidx);
+  String msg;
+  if (numidx == 1) {
+    msg = pref + _numidx + ": " + StringOD1 + " mg/L  ";
+  } else if (numidx == 2) {
+    msg = pref + _numidx + ": " + StringOD2 + " mg/L  ";
+  } else if (numidx == 3) {
+    msg = pref + _numidx + ": " + StringOD3 + " mg/L  ";
+  } else if (numidx == 4) {
+    msg = pref + _numidx + ": " + StringOD4 + " mg/L  ";
+  } else {
+    msg = "Error";
+  }
+  lcd.setCursor(0,1);
+  lcd.print(msg);
+  delay(2500);
+
 }
  
 float leer_muestra (int num_sensor, String tipo_sensor) {
