@@ -323,6 +323,7 @@ void setup() {
   configurar_botones();    
   
   imprimir_info();
+  modo_standby ();
   configurar_menu();
   
   //incializar Timer1
@@ -508,6 +509,71 @@ void serialPrintHelp() {
   Serial.println("***************");
 
 }
+
+void modo_standby () {
+  
+  sensor_OD_1.print("e\r");
+  delay(50);
+  Serial.print("OD1: ");  Serial.println(leer_info_sensor (1, "OD"));
+  sensor_OD_2.print("e\r");
+  delay(50);
+  Serial.print("OD2: ");  Serial.println(leer_info_sensor (2, "OD"));
+  sensor_OD_3.print("e\r");
+  delay(50);
+  Serial.print("OD2: ");  Serial.println(leer_info_sensor (3, "OD"));
+  sensor_OD_4.print("e\r");
+  delay(50);
+  Serial.print("OD2: ");  Serial.println(leer_info_sensor (4, "OD")); 
+  
+}
+    
+String leer_info_sensor (int idx, String tipo_sensor) {
+  
+  int numidx = idx;
+  byte rec = 0;
+  char data[20];
+  
+  if (tipo_sensor.equals("OD")) {
+    if (numidx == 1) {
+      sensor_OD_1.listen();      
+      sensor_OD_1.print("i\r");
+      delay(100);
+      if (sensor_OD_1.available() > 0) {
+        rec = sensor_OD_1.readBytesUntil('\r', data, sizeof (data) -1);
+        data[rec] = 0;
+      }
+      return data;
+    } else if (numidx == 2) {
+      sensor_OD_2.listen();      
+      sensor_OD_2.print("i\r");
+      delay(100);
+      if (sensor_OD_2.available() > 0) {
+        rec = sensor_OD_2.readBytesUntil('\r', data, sizeof (data) -1);
+        data[rec] = 0;
+      }
+      return data;
+    } else if (numidx == 3) {
+      sensor_OD_3.listen();      
+      sensor_OD_3.print("i\r");
+      delay(100);
+      if (sensor_OD_3.available() > 0) {
+        rec = sensor_OD_3.readBytesUntil('\r', data, sizeof (data) -1);
+        data[rec] = 0;
+      }
+      return data;
+    } else if (numidx == 4) {
+      sensor_OD_4.listen();      
+      sensor_OD_4.print("i\r");
+      delay(100);
+      if (sensor_OD_4.available() > 0) {
+        rec = sensor_OD_4.readBytesUntil('\r', data, sizeof (data) -1);
+        data[rec] = 0;
+      }
+      return data;
+    }
+  }
+  return "";
+} 
 
 void imprimir_info() {
   
