@@ -51,6 +51,7 @@ int SENSOR_T1 = 1;    int SENSOR_OD1 = 1;
 int SENSOR_T2 = 2;    int SENSOR_OD2 = 2;
 int SENSOR_T3 = 3;    int SENSOR_OD3 = 3;
 int SENSOR_T4 = 4;    int SENSOR_OD4 = 4;
+int MUESTRAS_POR_LECTURA = 5;
 
 MenuSystem menu_principal;
 Menu menu_info                ("Info estanques >");
@@ -247,10 +248,10 @@ ISR(TIMER1_COMPA_vect) {
     T3 = leer_temperatura(SENSOR_T3);
     T4 = leer_temperatura(SENSOR_T4);
     
-    OD1 = leer_OD(SENSOR_OD1);
-    OD2 = leer_OD(SENSOR_OD2);
-    OD3 = leer_OD(SENSOR_OD3);
-    OD4 = leer_OD(SENSOR_OD4);
+    OD1 = leer_muestra(SENSOR_OD1, "OD");
+    OD2 = leer_muestra(SENSOR_OD2, "OD");
+    OD3 = leer_muestra(SENSOR_OD3, "OD");
+    OD4 = leer_muestra(SENSOR_OD4, "OD");
     
     StringT0 = dtostrf(T0, 2,2, val);
     StringT1 = dtostrf(T1, 2,2, val);
@@ -284,6 +285,7 @@ ISR(TIMER1_COMPA_vect) {
     pzb += StringOD4;
      
     Serial.println(pzb);
+
   }  
 }
 
@@ -388,10 +390,10 @@ void loop() {
   T3 = leer_temperatura(SENSOR_T3);
   T4 = leer_temperatura(SENSOR_T4);
 
-  OD1 = leer_OD(SENSOR_OD1);
-  OD2 = leer_OD(SENSOR_OD2);
-  OD3 = leer_OD(SENSOR_OD3);
-  OD4 = leer_OD(SENSOR_OD4);
+  OD1 = leer_muestra(SENSOR_OD1, "OD");
+  OD2 = leer_muestra(SENSOR_OD2, "OD");
+  OD3 = leer_muestra(SENSOR_OD3, "OD");
+  OD4 = leer_muestra(SENSOR_OD4, "OD");
   
   StringT0 = dtostrf(T0, 2,2, val);
   StringT1 = dtostrf(T1, 2,2, val);
@@ -425,9 +427,10 @@ void loop() {
   pzb += StringOD4;
    
   Serial.println(pzb);
-*/  
+  
   //todas_temperaturas();
-  //sendInfoPayload(pzb);
+  //sendInfoPayload(pzb);  
+*/  
   delay(1000);
 }
 
@@ -617,11 +620,15 @@ void print_OD_LCD (int idx) {
 }
  
 float leer_muestra (int num_sensor, String tipo_sensor) {
-   
+   int i;
+   float suma = 0;
    if (tipo_sensor.equals("T")) {
      return leer_temperatura(num_sensor);
    } else if (tipo_sensor.equals("OD")) {
-     return leer_OD(num_sensor);
+       for ( i = 0; i <= MUESTRAS_POR_LECTURA; i++) {
+         suma += leer_OD(num_sensor);
+       }
+       return suma / (float)MUESTRAS_POR_LECTURA;    
    }
    return 0.0;
  }
