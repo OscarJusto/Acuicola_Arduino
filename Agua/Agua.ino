@@ -178,6 +178,8 @@ void on_cal5_selected(MenuItem* p_menu_item) {
 void cal_sensor(int idx, String tipo_sensor) {
   
   CALIBRACION = 1;
+  byte rec = 0;
+  char data[20];
   
   if (tipo_sensor.equals("OD")) {    
     
@@ -185,10 +187,10 @@ void cal_sensor(int idx, String tipo_sensor) {
     lcd.print("Humedezca sensor");
     delay(5000);
     lcd.setCursor(0,1);
-    lcd.print("Tener afuera    ");
+    lcd.print("Mantenga al aire");
     
-    for (int i=0; i < 150; i++) {
-      lcd.setCursor(13,1);
+    for (int i=0; i < 125; i++) {
+      lcd.setCursor(13,0);
       lcd.print(i);
       delay(1000);
     }
@@ -219,18 +221,25 @@ void cal_sensor(int idx, String tipo_sensor) {
     }
     
   } else if (tipo_sensor.equals("pH")) {
-    
+        
+    sensor_PH.listen();
     lcd.setCursor(0,1);
     lcd.print("Solucion pH7    ");      //Paso 1.- Colocar el sensor en solucion pH7
     delay(5000);                        //Espera 5 seg  
-    //sensor_PH.print("c\r");           //Paso 2.- Enviar comando "c\r" para modo continuo
+    sensor_PH.print("c\r");             //Paso 2.- Enviar comando "c\r" para modo continuo
     Serial.println("Comando c");
-    delay(380);                         //Esperar 0.380 ms para ajustar circuito
+    delay(380);                         //Esperar 0.380 ms para ajustar circuito    
     
-    for (int i=0; i < 120; i++) {       //Paso 3.- Esperar 1 a 2 min
+    for (int i=0; i < 120; i++) {       //Paso 3.- Esperar 1 a 2 min      
       lcd.setCursor(13,1);
-      lcd.print(i);
-      delay(1000);
+      lcd.print(i);      
+      if (sensor_PH.available() > 0) {
+      rec = sensor_PH.readBytesUntil('\r', data, sizeof (data) - 1);
+      data[rec] = 0;
+    }    
+      lcd.setCursor(13,0);
+      lcd.print(data);
+      delay(1000);      
     }
     
     //sensor_PH.print("s\r");           //Paso 4.- Enviar comando "s\r" para calibrar pH7
@@ -238,9 +247,9 @@ void cal_sensor(int idx, String tipo_sensor) {
     delay(380);                         //Esperar 0.380 ms para ajustar circuito
     
     lcd.setCursor(0,1);
-    lcd.print("Enjuague y seque");      //Paso 5.- Enjuagar y secar sensor
+    lcd.print("Enjuagar y secar");      //Paso 5.- Enjuagar y secar sensor
     
-    for (int i=0; i < 60; i++) {        //Esperar 1 min a que enjuague y seque sensor     
+    for (int i=0; i < 30; i++) {        //Esperar 30 seg a que enjuague y seque sensor     
       delay(1000);
     }
     
@@ -249,7 +258,13 @@ void cal_sensor(int idx, String tipo_sensor) {
     
     for (int i=0; i < 120; i++) {       //Paso 7.- Esperar 1 a 2 min
       lcd.setCursor(13,1);
-      lcd.print(i);
+      lcd.print(i);      
+      if (sensor_PH.available() > 0) {
+      rec = sensor_PH.readBytesUntil('\r', data, sizeof (data) - 1);
+      data[rec] = 0;
+    }    
+      lcd.setCursor(13,0);
+      lcd.print(data);      
       delay(1000);
     }
     
@@ -258,9 +273,9 @@ void cal_sensor(int idx, String tipo_sensor) {
     delay(380);                         //Esperar 0.380 ms para ajustar circuito
     
     lcd.setCursor(0,1);
-    lcd.print("Enjuague y seque");      //Paso 9.- Enjuagar y secar sensor
+    lcd.print("Enjuagar y secar");      //Paso 9.- Enjuagar y secar sensor
     
-    for (int i=0; i < 60; i++) {        //Esperar 1 min a que enjuague y seque sensor     
+    for (int i=0; i < 30; i++) {        //Esperar 30 seg a que enjuague y seque sensor     
       delay(1000);
     }
     
@@ -270,6 +285,12 @@ void cal_sensor(int idx, String tipo_sensor) {
     for (int i=0; i < 120; i++) {       //Paso 11.- Esperar 1 a 2 min
       lcd.setCursor(13,1);
       lcd.print(i);
+      if (sensor_PH.available() > 0) {
+      rec = sensor_PH.readBytesUntil('\r', data, sizeof (data) - 1);
+      data[rec] = 0;
+    }    
+      lcd.setCursor(13,0);
+      lcd.print(data);
       delay(1000);
     }
     
@@ -277,7 +298,7 @@ void cal_sensor(int idx, String tipo_sensor) {
     Serial.println("Comando t");
     delay(380);
     
-    //sensor_PH.print("e\r");           //Paso 13.- Enviar comando "e\r" para modo standby
+    sensor_PH.print("e\r");           //Paso 13.- Enviar comando "e\r" para modo standby
     Serial.println("Comando e");
     delay(380);
     
@@ -652,7 +673,8 @@ void modo_standby () {
   delay(50);
   Serial.print("OD4: ");  Serial.println(leer_info_sensor (4, "OD"));
   sensor_PH.print("e\r");
-  delay(50);  
+  delay(50);
+  sensor_PH.print("e\r");  
   Serial.print("pH: ");  Serial.println(leer_info_sensor (0, "pH"));
   
 }
