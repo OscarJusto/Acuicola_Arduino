@@ -50,6 +50,7 @@ DallasTemperature sensors_five(&fiveWire);
 DeviceAddress sensores_temp[5];
 int numberOfDevices;
 
+int CALIBRACION = 0;
 int SENSOR_T0 = 0;
 int SENSOR_T1 = 1;    int SENSOR_OD1 = 1;
 int SENSOR_T2 = 2;    int SENSOR_OD2 = 2;
@@ -156,22 +157,138 @@ void on_item5_selected(MenuItem* p_menu_item) {
 }
 
 void on_cal1_selected(MenuItem* p_menu_item) {
-  Serial.println("CAL_PH"); 
+  cal_sensor(0, "pH"); 
 }
 
 void on_cal2_selected(MenuItem* p_menu_item) {
-  Serial.println("CAL_OD1");
-}
+  cal_sensor(SENSOR_OD1, "OD");  
+} 
 
 void on_cal3_selected(MenuItem* p_menu_item) {
-  Serial.println("CAL_OD2");
+  cal_sensor(SENSOR_OD2, "OD");
 }
 
 void on_cal4_selected(MenuItem* p_menu_item) {
-  Serial.println("CAL_OD3");
+  cal_sensor(SENSOR_OD3, "OD");
 }
 void on_cal5_selected(MenuItem* p_menu_item) {
-  Serial.println("CAL_OD4");
+  cal_sensor(SENSOR_OD4, "OD");
+}
+
+void cal_sensor(int idx, String tipo_sensor) {
+  
+  CALIBRACION = 1;
+  
+  if (tipo_sensor.equals("OD")) {    
+    
+    lcd.setCursor(0,1);
+    lcd.print("Humedezca sensor");
+    delay(5000);
+    lcd.setCursor(0,1);
+    lcd.print("Tener afuera    ");
+    
+    for (int i=0; i < 150; i++) {
+      lcd.setCursor(13,1);
+      lcd.print(i);
+      delay(1000);
+    }
+    
+      if (idx == 1) {
+        sensor_OD_1.print("m\r");
+        Serial.println("m/r OD1");
+      } else if (idx == 2) {
+        //sensor_OD_2.print("m\r");
+        Serial.println("m/r OD2");
+      } else if (idx == 3) {
+        //sensor_OD_3.print("m\r");
+        Serial.println("m/r OD3");
+      } else if (idx == 4) {
+        //sensor_OD_4.print("m\r");
+        Serial.println("m/r OD4");
+      }   
+    
+    delay(500);
+    lcd.setCursor(0,1);
+    lcd.print("OD");
+    lcd.setCursor(2,1);
+    lcd.print(idx);
+    lcd.setCursor(3,1);
+    lcd.print(" calibrado   ");    
+    for (int i=0; i < 10; i++) {        //Esperar 10 seg     
+      delay(1000);
+    }
+    
+  } else if (tipo_sensor.equals("pH")) {
+    
+    lcd.setCursor(0,1);
+    lcd.print("Solucion pH7    ");      //Paso 1.- Colocar el sensor en solucion pH7
+    delay(5000);                        //Espera 5 seg  
+    //sensor_PH.print("c\r");           //Paso 2.- Enviar comando "c\r" para modo continuo
+    Serial.println("Comando c");
+    delay(380);                         //Esperar 0.380 ms para ajustar circuito
+    
+    for (int i=0; i < 120; i++) {       //Paso 3.- Esperar 1 a 2 min
+      lcd.setCursor(13,1);
+      lcd.print(i);
+      delay(1000);
+    }
+    
+    //sensor_PH.print("s\r");           //Paso 4.- Enviar comando "s\r" para calibrar pH7
+    Serial.println("Comando s");
+    delay(380);                         //Esperar 0.380 ms para ajustar circuito
+    
+    lcd.setCursor(0,1);
+    lcd.print("Enjuague y seque");      //Paso 5.- Enjuagar y secar sensor
+    
+    for (int i=0; i < 60; i++) {        //Esperar 1 min a que enjuague y seque sensor     
+      delay(1000);
+    }
+    
+    lcd.setCursor(0,1);
+    lcd.print("Solucion pH4    ");      //Paso 6.- Colocar sensor en solucion pH4
+    
+    for (int i=0; i < 120; i++) {       //Paso 7.- Esperar 1 a 2 min
+      lcd.setCursor(13,1);
+      lcd.print(i);
+      delay(1000);
+    }
+    
+    //sensor_PH.print("f\r");           //Paso 8.- Enviar comando "f\r" para calibrar pH4
+    Serial.println("Comando f");
+    delay(380);                         //Esperar 0.380 ms para ajustar circuito
+    
+    lcd.setCursor(0,1);
+    lcd.print("Enjuague y seque");      //Paso 9.- Enjuagar y secar sensor
+    
+    for (int i=0; i < 60; i++) {        //Esperar 1 min a que enjuague y seque sensor     
+      delay(1000);
+    }
+    
+    lcd.setCursor(0,1);
+    lcd.print("Solucio pH10    ");      //Paso 10.- Colocar sensor en solucion pH10
+    
+    for (int i=0; i < 120; i++) {       //Paso 11.- Esperar 1 a 2 min
+      lcd.setCursor(13,1);
+      lcd.print(i);
+      delay(1000);
+    }
+    
+    //sensor_PH.print("t\r");           //Paso 12.- Enviar comando "t\r" para calibrar pH10
+    Serial.println("Comando t");
+    delay(380);
+    
+    //sensor_PH.print("e\r");           //Paso 13.- Enviar comando "e\r" para modo standby
+    Serial.println("Comando e");
+    delay(380);
+    
+    lcd.setCursor(0,1);
+    lcd.print("  pH Calibrado  ");      //Paso 14.- Sensor calibrado en EEPROM
+    
+    for (int i=0; i < 10; i++) {        //Esperar 10 seg     
+      delay(1000);
+    }
+  }
+  CALIBRACION = 0;
 }
 
 void configurar_menu () {
@@ -234,6 +351,8 @@ void ISR_A() {
 
 ISR(TIMER1_COMPA_vect) {
   
+  if (CALIBRACION == 0) {
+    
   seconds ++;
   
   if (seconds >= 40) {
@@ -285,11 +404,14 @@ ISR(TIMER1_COMPA_vect) {
      
     Serial.println(pzb);
 
-  }  
+  }
+  } 
 }
 
 ISR(TIMER3_COMPA_vect) {
   
+  if (CALIBRACION == 0) {
+    
   seconds_3 --;
    
   if (seconds_3 <= 0) {
@@ -303,7 +425,8 @@ ISR(TIMER3_COMPA_vect) {
     
     count_samples_3 = 0;        
     sendInfoPayload(pzb);
-  }  
+  }
+  } 
 }
 
 void setup() {
