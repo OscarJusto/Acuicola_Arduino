@@ -20,10 +20,14 @@
 #define RX_OD_4 10
 #define TX_OD_4 6
 
+#define RX_PH 50
+#define TX_PH 51
+
 SoftwareSerial sensor_OD_1 (RX_OD_1, TX_OD_1);
 SoftwareSerial sensor_OD_2 (RX_OD_2, TX_OD_2);
 SoftwareSerial sensor_OD_3 (RX_OD_3, TX_OD_3);
 SoftwareSerial sensor_OD_4 (RX_OD_4, TX_OD_4);
+SoftwareSerial sensor_PH (RX_PH, TX_PH);
 
 #define ONE_WIRE_BUS  45
 #define TWO_WIRE_BUS  39
@@ -59,11 +63,12 @@ MenuItem mi_estanque_1        ("   Estanque 1  >");
 MenuItem mi_estanque_2        ("<  Estanque 2  >");
 MenuItem mi_estanque_3        ("<  Estanque 3  >");
 MenuItem mi_estanque_4        ("<  Estanque 4  >");
-Menu menu_info_pH             ("< Sensor de pH >");
-MenuItem mi_pH_1              ("<< Estanque 1 >>");
-MenuItem mi_pH_2              ("<< Estanque 2 >>");
-MenuItem mi_pH_3              ("<< Estanque 3 >>");
-MenuItem mi_pH_4              ("<< Estanque 4   ");
+MenuItem mi_pH                ("< Sensor de pH >");
+//Menu menu_info_pH             ("< Sensor de pH >");
+//MenuItem mi_pH_1              ("<< Estanque 1 >>");
+//MenuItem mi_pH_2              ("<< Estanque 2 >>");
+//MenuItem mi_pH_3              ("<< Estanque 3 >>");
+//MenuItem mi_pH_4              ("<< Estanque 4   ");
 Menu menu_calibrar            ("<  Calibrar     ");
 MenuItem mc_sensor_1          ("<<     pH     >>");
 MenuItem mc_sensor_2          ("<<     OD 1   >>");
@@ -127,10 +132,7 @@ void pedir_temperaturas() {
 }  
 
 void on_item1_selected(MenuItem* p_menu_item) {
-  Serial.println("PH");
-  lcd.setCursor(0,1);
-  lcd.print("       PH       ");
-  delay(2000);
+  print_OD_LCD ();
 }
 
 void on_item2_selected(MenuItem* p_menu_item) {  
@@ -176,12 +178,13 @@ void configurar_menu () {
     
   Serial.println("Construyendo menu.");
   
-  menu_info_pH.add_item(&mi_pH_1, &on_item1_selected);
-  menu_info_pH.add_item(&mi_pH_2, &on_item1_selected);
-  menu_info_pH.add_item(&mi_pH_3, &on_item1_selected);  
-  menu_info_pH.add_item(&mi_pH_4, &on_item1_selected);  
+  //menu_info_pH.add_item(&mi_pH_1, &on_item1_selected);
+  //menu_info_pH.add_item(&mi_pH_2, &on_item1_selected);
+  //menu_info_pH.add_item(&mi_pH_3, &on_item1_selected);  
+  //menu_info_pH.add_item(&mi_pH_4, &on_item1_selected);  
   
-  menu_info.add_menu(&menu_info_pH);
+  //menu_info.add_menu(&menu_info_pH);
+  menu_info.add_item(&mi_pH , &on_item1_selected);
   menu_info.add_item(&mi_estanque_1, &on_item2_selected);
   menu_info.add_item(&mi_estanque_2, &on_item3_selected);
   menu_info.add_item(&mi_estanque_3, &on_item4_selected);
@@ -194,7 +197,7 @@ void configurar_menu () {
   menu_calibrar.add_item(&mc_sensor_4, &on_cal4_selected);
   menu_calibrar.add_item(&mc_sensor_5, &on_cal5_selected);
   
-  menu_calibrar.add_menu(&menu_info_pH);
+  //menu_calibrar.add_menu(&menu_info_pH);
   
   menu_principal.set_root_menu(&menu_info);
   
@@ -247,7 +250,7 @@ ISR(TIMER1_COMPA_vect) {
     OD1 = leer_muestra(SENSOR_OD1, "OD");
     OD2 = leer_muestra(SENSOR_OD2, "OD");
     OD3 = leer_muestra(SENSOR_OD3, "OD");
-    OD4 = leer_muestra(SENSOR_OD4, "OD");
+    OD4 = leer_muestra(SENSOR_OD4, "OD");    
     
     StringT0 = dtostrf(T0, 2,2, val);
     StringT1 = dtostrf(T1, 2,2, val);
@@ -319,6 +322,7 @@ void setup() {
   sensor_OD_2.begin(38400);
   sensor_OD_3.begin(38400);
   sensor_OD_4.begin(38400);
+  sensor_PH.begin(38400);
   
   configurar_botones();    
   
@@ -427,7 +431,7 @@ void loop() {
   
   //todas_temperaturas();
   //sendInfoPayload(pzb);  
-*/  
+*/
   delay(1000);
 }
 
@@ -520,10 +524,13 @@ void modo_standby () {
   Serial.print("OD2: ");  Serial.println(leer_info_sensor (2, "OD"));
   sensor_OD_3.print("e\r");
   delay(50);
-  Serial.print("OD2: ");  Serial.println(leer_info_sensor (3, "OD"));
+  Serial.print("OD3: ");  Serial.println(leer_info_sensor (3, "OD"));
   sensor_OD_4.print("e\r");
   delay(50);
-  Serial.print("OD2: ");  Serial.println(leer_info_sensor (4, "OD")); 
+  Serial.print("OD4: ");  Serial.println(leer_info_sensor (4, "OD"));
+  sensor_PH.print("e\r");
+  delay(50);  
+  Serial.print("pH: ");  Serial.println(leer_info_sensor (0, "pH"));
   
 }
     
@@ -571,7 +578,16 @@ String leer_info_sensor (int idx, String tipo_sensor) {
       }
       return data;
     }
-  }
+  } else if (tipo_sensor.equals("pH")) {
+    sensor_PH.listen();
+    sensor_PH.print("i\r");
+    delay(100);
+    if (sensor_PH.available() > 0) {
+        rec = sensor_PH.readBytesUntil('\r', data, sizeof (data) -1);
+        data[rec] = 0;
+      }
+      return data;
+  }    
   return "";
 } 
 
@@ -703,6 +719,27 @@ void print_LCD_OD_SENSOR (int idx) {
   delay(2500);
 
 }
+
+void print_pH () {
+  
+  String pref = "pH";  
+  float PH = leer_muestra(0, "pH");
+  Serial.print(pref + ": ");
+  Serial.println(PH);
+}
+
+void print_OD_LCD () {
+  
+  String pref = "pH";  
+  float PH = leer_muestra(0, "pH");
+  char tempod1[6];
+  String _PH = dtostrf(PH, 1, 2, tempod1);
+  String msg = pref +  ": " + _PH + "       " ;
+  lcd.setCursor(0,1);
+  lcd.print(msg);
+  delay(2500);
+  
+}
  
 float leer_muestra (int num_sensor, String tipo_sensor) {
    int i;
@@ -714,6 +751,11 @@ float leer_muestra (int num_sensor, String tipo_sensor) {
          suma += leer_OD(num_sensor);
        }
        return suma / (float)MUESTRAS_POR_LECTURA;    
+   } else if (tipo_sensor.equals("pH")) {
+       for ( i = 0; i <= MUESTRAS_POR_LECTURA; i++) {
+         suma += leer_PH();
+       }
+       return suma / (float) MUESTRAS_POR_LECTURA;
    }
    return 0.0;
  }
@@ -733,6 +775,21 @@ float leer_temperatura(int sensor) {
   }
   
 }
+
+float leer_PH() {
+  
+  byte rec = 0;
+  char data[20];
+  
+  sensor_PH.listen();
+  sensor_PH.print("r\r");
+  delay(280);
+  if (sensor_PH.available() > 0) {
+      rec = sensor_PH.readBytesUntil('\r', data, sizeof (data) - 1);
+      data[rec] = 0;
+    }
+    return atof(data);
+}  
 
 float leer_OD(int num_sensor) {
   
