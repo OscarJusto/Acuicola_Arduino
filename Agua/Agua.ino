@@ -197,16 +197,12 @@ void cal_sensor(int idx, String tipo_sensor) {
     
       if (idx == 1) {
         sensor_OD_1.print("m\r");
-        Serial.println("m/r OD1");
       } else if (idx == 2) {
-        //sensor_OD_2.print("m\r");
-        Serial.println("m/r OD2");
+        sensor_OD_2.print("m\r");
       } else if (idx == 3) {
-        //sensor_OD_3.print("m\r");
-        Serial.println("m/r OD3");
+        sensor_OD_3.print("m\r");
       } else if (idx == 4) {
-        //sensor_OD_4.print("m\r");
-        Serial.println("m/r OD4");
+        sensor_OD_4.print("m\r");
       }   
     
     delay(500);
